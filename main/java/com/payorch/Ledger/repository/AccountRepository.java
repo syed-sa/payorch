@@ -1,11 +1,13 @@
-package com.payorch.Ledger.repository;
+package com.payorch.ledger.repository;
 
-import com.payorch.Ledger.model.Account;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import com.payorch.ledger.model.Account;
+
 import java.util.Optional;
 import java.util.UUID;
 
