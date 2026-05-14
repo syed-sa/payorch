@@ -1,4 +1,4 @@
-package com.payorch.Ledger.model;
+package com.payorch.ledger.model;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,5 +1,5 @@
 // Package: com.saleem.payroute.domain.transaction.model
-package com.payorch.Ledger.model;
+package com.payorch.ledger.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
