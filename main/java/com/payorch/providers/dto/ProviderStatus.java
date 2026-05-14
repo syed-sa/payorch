@@ -1,4 +1,4 @@
-package com.payorch.providers.model;
+package com.payorch.providers.dto;
 public enum ProviderStatus {
     SUCCESS, PENDING, FAILED
 }
