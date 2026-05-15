@@ -1,12 +1,13 @@
 package com.payorch.providers.service.impl;
-import com.payorch.Ledger.model.Transaction;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.payorch.providers.model.ProviderResponse;
-import com.payorch.providers.model.ProviderStatus;
+
+import com.payorch.ledger.model.Transaction;
+import com.payorch.providers.dto.ProviderResponse;
+import com.payorch.providers.dto.ProviderStatus;
 import com.payorch.providers.service.PaymentProvider;
 
 
