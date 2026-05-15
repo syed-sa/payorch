@@ -1,8 +1,8 @@
 // Package: com.payorch.providers.service
 package com.payorch.providers.service;
 
-import com.payorch.Ledger.model.Transaction;
-import com.payorch.providers.model.ProviderResponse;
+import com.payorch.ledger.model.Transaction;
+import com.payorch.providers.dto.ProviderResponse;
 
 public interface PaymentProvider {
     
