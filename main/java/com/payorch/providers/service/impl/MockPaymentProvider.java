@@ -1,9 +1,9 @@
 // Package: com.payorch.providers.mock
 package com.payorch.providers.service.impl;
 
-import com.payorch.Ledger.model.Transaction;
-import com.payorch.providers.model.ProviderResponse;
-import com.payorch.providers.model.ProviderStatus;
+import com.payorch.ledger.model.Transaction;
+import com.payorch.providers.dto.ProviderResponse;
+import com.payorch.providers.dto.ProviderStatus;
 import com.payorch.providers.service.PaymentProvider;
 
 import lombok.extern.slf4j.Slf4j;
