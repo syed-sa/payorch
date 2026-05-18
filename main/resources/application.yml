@@ -1,0 +1,12 @@
+resilience4j:
+  circuitbreaker:
+    instances:
+      paymentProviderCircuit:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        slowCallRateThreshold: 75
+        slowCallDurationThreshold: 3000ms
+        waitDurationInOpenState: 15000ms
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
