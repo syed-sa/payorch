@@ -1,5 +1,6 @@
 // File: src/main/java/com/payorch/orchestrator/service/SmartRoutingStrategy.java
 package com.payorch.orchestrator.service;
+
 import com.payorch.orchestrator.model.PSPHealth;
 import com.payorch.providers.service.PaymentProvider; // Using your interface
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SmartRoutingStrategy {
 
-    // Spring automatically injects all beans implementing PaymentProvider (StripeProvider, RazorpayProvider, etc.)
+    // Spring automatically injects all beans implementing PaymentProvider
+    // (StripeProvider, RazorpayProvider, etc.)
     private final List<PaymentProvider> providers;
     private final MetricsService metricsService;
 
@@ -23,14 +25,16 @@ public class SmartRoutingStrategy {
     private static final double W_LATENCY = 0.10;
 
     /**
-     * Iterates through all available Provider beans and selects the best one based on 
+     * Iterates through all available Provider beans and selects the best one based
+     * on
      * weighted health metrics from Redis/DB.
      */
     public PaymentProvider selectBestProvider() {
         return providers.stream()
                 .filter(this::isProviderAvailable)
                 .max(Comparator.comparingDouble(this::calculateScore))
-                .orElseThrow(() -> new RuntimeException("CRITICAL: No healthy payment providers available in the circuit"));
+                .orElseThrow(
+                        () -> new RuntimeException("CRITICAL: No healthy payment providers available in the circuit"));
     }
 
     private boolean isProviderAvailable(PaymentProvider provider) {
@@ -47,10 +51,22 @@ public class SmartRoutingStrategy {
         double latencyScore = Math.max(0, (2000 - health.getP95Latency()) / 2000.0) * W_LATENCY;
 
         double totalScore = successScore + costScore + latencyScore;
-        
-        log.debug("PSP Score Calculation -> ID: {}, Total: {}, [S: {}, C: {}, L: {}]", 
-                  pspId, totalScore, successScore, costScore, latencyScore);
-        
+
+        log.debug("PSP Score Calculation -> ID: {}, Total: {}, [S: {}, C: {}, L: {}]",
+                pspId, totalScore, successScore, costScore, latencyScore);
+
         return totalScore;
+    }
+
+    public PaymentProvider selectBestProviderExcluding(List<String> excludedIds) {
+        return providers.stream()
+                .filter(p -> !excludedIds.contains(p.getProviderId()))
+                .filter(this::isProviderAvailable)
+                .max(Comparator.comparingDouble(this::calculateScore))
+                .orElseThrow(() -> new RuntimeException("No backup payment providers available for route allocation"));
+    }
+
+    public int getAvailableProviderCount() {
+        return providers.size();
     }
 }
