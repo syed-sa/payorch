@@ -1,0 +1,37 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: payorch-webhook-worker
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+
+logging:
+  level:
+    root: INFO
+    com.payorch: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Webhook Configuration
+webhook:
+  stripe:
+    secret: ${STRIPE_WEBHOOK_SECRET:}
+    api-key: ${STRIPE_API_KEY:}
+  razorpay:
+    secret: ${RAZORPAY_WEBHOOK_SECRET:}
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+
+# Kafka Topic Configuration
+kafka:
+  topics:
+    stripe-webhook: stripe.webhook.events
+    razorpay-webhook: razorpay.webhook.events
