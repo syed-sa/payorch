@@ -1,4 +1,4 @@
-// File: src/main/java/com/payorch/orchestrator/service/PaymentStateManager.java
+// File: core-orchestrator/src/main/java/com/payorch/orchestrator/service/PaymentStateManager.java
 package com.payorch.orchestrator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,11 +10,13 @@ import com.payorch.outbox.repository.OutboxRepository;
 import com.payorch.providers.dto.ProviderResponse;
 import com.payorch.providers.dto.ProviderStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PaymentStateManager {
@@ -57,6 +59,47 @@ public class PaymentStateManager {
         transactionRepository.save(txn);
         
         createOutboxEvent("PAYMENT_FAILED", txn);
+    }
+
+    /**
+     * PROCESSES INBOUND WEBHOOK STATE TRANSITIONS (Called by Kafka Consumers)
+     * Matches transactions using the unique provider reference identification key.
+     */
+    @Transactional
+    public void processWebhookStateTransition(String providerRefId, String targetStatus, String failureReason) {
+        log.info("Acquiring transaction record update boundary lock for Provider Ref: {}", providerRefId);
+
+        // 1. Fetch the transaction using the unique reference assigned by Stripe/Razorpay
+        // Note: For high-concurrency assurance, ensure your repository layer implements findByProviderRefId
+        Transaction txn = transactionRepository.findByProviderRefId(providerRefId)
+                .orElseThrow(() -> new IllegalArgumentException("No transaction found in Ledger matching Provider Reference: " + providerRefId));
+
+        // 2. IDEMPOTENCY GUARD: If the transaction is already in a final state, discard the duplicate update safely
+        if (TransactionStatus.SUCCESS.equals(txn.getStatus()) || TransactionStatus.FAILED.equals(txn.getStatus())) {
+            log.info("Transaction {} is already processed and settled in a final state ({}). Discarding webhook stream event.", 
+                    txn.getId(), txn.getStatus());
+            return;
+        }
+
+        // 3. Mutate the state machine data matrix values
+        if ("SUCCESS".equalsIgnoreCase(targetStatus)) {
+            txn.setStatus(TransactionStatus.SUCCESS);
+            log.info("Transitioning transaction state to SUCCESS for system record tracking ID: {}", txn.getId());
+        } else if ("FAILED".equalsIgnoreCase(targetStatus)) {
+            txn.setStatus(TransactionStatus.FAILED);
+            txn.setFailureReason(failureReason != null ? failureReason : "WEBHOOK_ASYNC_GATEWAY_FAILURE_REPORT");
+            log.warn("Transitioning transaction state to FAILED for system record tracking ID: {}. Reason: {}", txn.getId(), failureReason);
+        } else {
+            log.info("Webhook event contains non-final state tracking update ({}). No state transition needed for tracking ID: {}", targetStatus, txn.getId());
+            return; // Exit without committing any unnecessary database mutations
+        }
+
+        txn.setUpdatedAt(LocalDateTime.now());
+        transactionRepository.saveAndFlush(txn);
+
+        // 4. EMIT TRANSACTIONAL OUTBOX EVENT: Keep your downstream double-entry ledger ledgers and notifications perfectly synchronized
+        createOutboxEvent("PAYMENT_WEBHOOK_SETTLED", txn);
+        log.info("State synchronization successfully committed to ledger tables for transaction tracking tracking record ID: {}", txn.getId());
     }
 
     private void createOutboxEvent(String eventType, Object payloadData) {

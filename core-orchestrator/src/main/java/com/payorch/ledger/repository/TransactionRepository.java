@@ -1,9 +1,14 @@
 package com.payorch.ledger.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.payorch.ledger.model.Transaction;
-
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
 import java.util.UUID;
 
-public interface TransactionRepository extends JpaRepository<Transaction, UUID> {}
+@Repository
+public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
+    
+    // Crucial for Webhook processing performance: Ensure provider_ref_id column has a database Index configured
+    Optional<Transaction> findByProviderRefId(String providerRefId);
+}
