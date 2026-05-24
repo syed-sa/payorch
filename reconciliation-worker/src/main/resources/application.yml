@@ -14,7 +14,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate # Validates the schema on startup without making changes; ensures it matches our entity definitions
     show-sql: false
     properties:
       hibernate:
