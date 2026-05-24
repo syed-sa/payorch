@@ -54,7 +54,7 @@ public class WebhookEventProducer {
             Message<String> message = MessageBuilder
                     .withPayload(payload)
                     .setHeader(KafkaHeaders.TOPIC, topic)
-                    .setHeader(KafkaHeaders.MESSAGE_KEY, key)
+                    .setHeader(KafkaHeaders.KEY, key)
                     .setHeader("provider", provider)
                     .setHeader("timestamp", System.currentTimeMillis())
                     .build();
