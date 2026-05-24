@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.14</version>
+        <version>3.5.4</version>
         <relativePath/>
     </parent>
 
@@ -31,7 +31,8 @@
         <stripe.version>25.10.0</stripe.version>
         <razorpay.version>1.4.3</razorpay.version>
         <resilience4j.version>2.2.0</resilience4j.version>
-        <spring-kafka.version>3.1.5</spring-kafka.version>
+        <lombok.version>1.18.38</lombok.version>
+        <shedlock.version>5.10.0</shedlock.version>
     </properties>
 
     <!-- Shared Dependency Management -->
@@ -49,19 +50,25 @@
                 <version>${razorpay.version}</version>
             </dependency>
 
-            <!-- Kafka -->
-            <dependency>
-                <groupId>org.springframework.kafka</groupId>
-                <artifactId>spring-kafka</artifactId>
-                <version>${spring-kafka.version}</version>
-            </dependency>
-
             <!-- Resilience4j -->
             <dependency>
                 <groupId>io.github.resilience4j</groupId>
                 <artifactId>resilience4j-spring-boot3</artifactId>
                 <version>${resilience4j.version}</version>
             </dependency>
+
+            <!-- ShedLock -->
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -71,13 +78,26 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${project.parent.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
                 </plugin>
+                
             </plugins>
         </pluginManagement>
     </build>
