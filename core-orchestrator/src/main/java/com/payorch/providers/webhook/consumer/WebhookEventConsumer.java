@@ -1,4 +1,3 @@
-// File: core-orchestrator/src/main/java/com/payorch/providers/webhook/consumer/WebhookEventConsumer.java
 package com.payorch.providers.webhook.consumer;
 
 import com.payorch.orchestrator.service.PaymentStateManager;
@@ -10,6 +9,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import com.payorch.providers.dto.NormalizedWebhookData;
 
 @Slf4j
 @Component
@@ -34,7 +34,7 @@ public class WebhookEventConsumer {
 
         try {
             // 1. Structural transformation inside the isolated providers domain boundary
-            com.payorch.providers.dto.NormalizedWebhookData normalizedData = parserFactory.getParser(providerType).parse(record.value());
+            NormalizedWebhookData normalizedData = parserFactory.getParser(providerType).parse(record.value());
 
             log.info("Decoded payload footprint. Provider ID: {}, Normalized Status Code: {}", 
                     normalizedData.getProviderRefId(), normalizedData.getStatus());

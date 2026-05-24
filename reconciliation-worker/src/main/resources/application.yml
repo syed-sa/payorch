@@ -1,0 +1,27 @@
+# File: reconciliation-worker/src/main/resources/application.yml
+server:
+  port: 8082
+
+spring:
+  application:
+    name: payorch-reconciliation-worker
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payorch_ledger
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  batch:
+    jdbc:
+      initialize-schema: always # Auto-generates Spring Batch metadata tables on initial launch
+    job:
+      enabled: false # Disables automatic job execution on launch; execution is driven purely by our scheduler

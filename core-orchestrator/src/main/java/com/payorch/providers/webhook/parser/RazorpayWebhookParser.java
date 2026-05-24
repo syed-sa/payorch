@@ -8,7 +8,7 @@ import com.payorch.providers.webhook.WebhookParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
+import com.payorch.providers.dto.NormalizedWebhookData;
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class RazorpayWebhookParser implements WebhookParser {
     }
 
     @Override
-    public com.payorch.providers.dto.NormalizedWebhookData parse(String rawJsonPayload) {
+    public NormalizedWebhookData parse(String rawJsonPayload) {
         try {
             JsonNode rootNode = objectMapper.readTree(rawJsonPayload);
             JsonNode paymentEntity = rootNode.path("payload").path("payment").path("entity");
@@ -42,7 +42,7 @@ public class RazorpayWebhookParser implements WebhookParser {
                 mappedStatus = ProviderStatus.PENDING;
             }
 
-            return com.payorch.providers.dto.NormalizedWebhookData.builder()
+            return NormalizedWebhookData.builder()
                     .providerRefId(providerRefId)
                     .status(mappedStatus)
                     .errorMessage(errorMessage)
