@@ -9,7 +9,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "ledger_entries")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LedgerEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,10 +28,10 @@ public class LedgerEntry {
     private Account account;
 
     @Column(nullable = false)
-    private BigDecimal amount; // Negative for Debit, Positive for Credit
+    private BigDecimal amount;
 
     @Column(name = "entry_type", nullable = false)
-    private String entryType; // "DEBIT" or "CREDIT"
+    private String entryType;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

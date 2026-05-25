@@ -20,6 +20,7 @@
     <description>Multi-module payment orchestration platform</description>
 
     <modules>
+        <module>payorch-domain</module>
         <module>core-orchestrator</module>
         <module>webhook-worker</module>
         <module>reconciliation-worker</module>

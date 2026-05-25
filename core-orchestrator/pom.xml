@@ -85,6 +85,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>com.payorch</groupId>
+            <artifactId>payorch-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
