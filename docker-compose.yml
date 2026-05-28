@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # CORE DATABASE TIERS
+  # =========================================================================
+  payorch-postgres:
+    image: postgres:15-alpine
+    container_name: payorch-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: payorch_ledger
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d payorch_ledger"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # =========================================================================
+  # STREAMING & MESSAGE BUFFER TIER (KAFKA)
+  # =========================================================================
+  payorch-zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: payorch-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  payorch-kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: payorch-kafka
+    depends_on:
+      - payorch-zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: payorch-zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://payorch-kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
