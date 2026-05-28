@@ -89,6 +89,8 @@
             <groupId>com.payorch</groupId>
             <artifactId>payorch-domain</artifactId>
             <version>${project.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Testing -->
