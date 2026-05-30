@@ -1,7 +1,7 @@
-package com.payorch.providers.webhook.consumer;
+package com.payorch.webhook.consumer;
 
 import com.payorch.orchestrator.service.PaymentStateManager;
-import com.payorch.providers.webhook.WebhookParserFactory;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -10,6 +10,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import com.payorch.providers.dto.NormalizedWebhookData;
+import com.payorch.webhook.WebhookParserFactory;
 
 @Slf4j
 @Component

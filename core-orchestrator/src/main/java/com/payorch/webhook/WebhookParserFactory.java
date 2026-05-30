@@ -1,5 +1,5 @@
 // File: core-orchestrator/src/main/java/com/payorch/providers/webhook/WebhookParserFactory.java
-package com.payorch.providers.webhook;
+package com.payorch.webhook;
 
 import org.springframework.stereotype.Component;
 import java.util.List;

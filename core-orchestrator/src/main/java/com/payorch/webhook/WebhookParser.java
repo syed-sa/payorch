@@ -1,5 +1,5 @@
 // File: core-orchestrator/src/main/java/com/payorch/providers/webhook/WebhookParser.java
-package com.payorch.providers.webhook;
+package com.payorch.webhook;
 
 import com.payorch.providers.dto.NormalizedWebhookData;
 

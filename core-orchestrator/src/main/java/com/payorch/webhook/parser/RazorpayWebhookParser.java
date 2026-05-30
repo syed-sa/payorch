@@ -1,44 +1,44 @@
-// File: core-orchestrator/src/main/java/com/payorch/providers/webhook/parser/StripeWebhookParser.java
-package com.payorch.providers.webhook.parser;
+// File: core-orchestrator/src/main/java/com/payorch/providers/webhook/parser/RazorpayWebhookParser.java
+package com.payorch.webhook.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payorch.providers.dto.ProviderStatus;
-import com.payorch.providers.webhook.WebhookParser;
-import com.payorch.providers.dto.NormalizedWebhookData;
+import com.payorch.webhook.WebhookParser;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
+import com.payorch.providers.dto.NormalizedWebhookData;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class StripeWebhookParser implements WebhookParser {
+public class RazorpayWebhookParser implements WebhookParser {
 
     private final ObjectMapper objectMapper;
 
     @Override
     public String getSupportedProvider() {
-        return "STRIPE";
+        return "RAZORPAY";
     }
 
     @Override
     public NormalizedWebhookData parse(String rawJsonPayload) {
         try {
             JsonNode rootNode = objectMapper.readTree(rawJsonPayload);
-            JsonNode dataObject = rootNode.path("data").path("object");
+            JsonNode paymentEntity = rootNode.path("payload").path("payment").path("entity");
             
-            String providerRefId = dataObject.path("id").asText();
-            String eventType = rootNode.path("type").asText();
+            String providerRefId = paymentEntity.path("id").asText();
+            String eventType = rootNode.path("event").asText();
             
             ProviderStatus mappedStatus;
             String errorMessage = null;
 
-            if ("payment_intent.succeeded".equals(eventType) || "charge.succeeded".equals(eventType)) {
+            if ("payment.captured".equals(eventType)) {
                 mappedStatus = ProviderStatus.SUCCESS;
-            } else if ("payment_intent.payment_failed".equals(eventType) || "charge.failed".equals(eventType)) {
+            } else if ("payment.failed".equals(eventType)) {
                 mappedStatus = ProviderStatus.FAILED;
-                errorMessage = dataObject.path("last_payment_error").path("message").asText("Stripe core network execution failure");
+                errorMessage = paymentEntity.path("error_description").asText("Razorpay bank terminal processing failure");
             } else {
                 mappedStatus = ProviderStatus.PENDING;
             }
@@ -50,8 +50,8 @@ public class StripeWebhookParser implements WebhookParser {
                     .build();
 
         } catch (Exception e) {
-            log.error("Failed to map incoming Stripe webhook JSON schema", e);
-            throw new IllegalArgumentException("Invalid layout or signatures inside Stripe JSON object", e);
+            log.error("Failed to map incoming Razorpay webhook JSON schema", e);
+            throw new IllegalArgumentException("Invalid layout or signatures inside Razorpay JSON object", e);
         }
     }
 }
