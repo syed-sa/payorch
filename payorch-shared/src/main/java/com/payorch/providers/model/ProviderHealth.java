@@ -19,11 +19,13 @@ public class ProviderHealth {
     private String providerId;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @Column(name = "last_success_rate", precision = 5, scale = 2)
     private BigDecimal lastSuccessRate;
 
     @Column(name = "updated_at")
+    @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 }

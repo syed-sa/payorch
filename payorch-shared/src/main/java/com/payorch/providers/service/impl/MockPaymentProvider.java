@@ -20,7 +20,10 @@ public class MockPaymentProvider implements PaymentProvider {
         log.info("Mock Provider processing transaction: {}", transaction.getId());
 
         // Simulate a tiny network delay
-        try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ignored) {
+        }
 
         // Logic: If amount is exactly 999.99, simulate a failure for testing
         if (transaction.getAmount().doubleValue() == 999.99) {
