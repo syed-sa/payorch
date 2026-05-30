@@ -1,5 +1,6 @@
 com\payorch\reconciliation\scheduler\ReconciliationScheduler.class
 com\payorch\reconciliation\step\TransactionItemProcessor.class
+com\payorch\reconciliation\step\TransactionItemReader.class
 com\payorch\reconciliation\config\DistributedLockConfig.class
 com\payorch\reconciliation\config\ReconciliationBatchConfig.class
 com\payorch\reconciliation\domain\ReconciliationMismatch$ReconciliationMismatchBuilder.class
