@@ -1,6 +1,4 @@
 package com.payorch.providers.dto;
-
-import com.payorch.providers.dto.ProviderStatus;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDateTime;
