@@ -9,9 +9,13 @@ import org.springframework.stereotype.Service;
 import com.payorch.ledger.model.Transaction;
 import com.payorch.providers.dto.ProviderResponse;
 import com.payorch.providers.dto.ProviderStatus;
+import com.payorch.providers.dto.ProviderTransactionDetails;
+import com.payorch.providers.exception.ProviderStatusException;
 import com.payorch.providers.service.PaymentProvider;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class RazorpayProvider implements PaymentProvider {
 
     @Value("${payment.razorpay.key-id}")
@@ -40,10 +44,32 @@ public class RazorpayProvider implements PaymentProvider {
                     .build();
 
         } catch (Exception e) {
+            log.error("Razorpay payment creation failed for transaction {}", transaction.getId(), e);
             return ProviderResponse.builder()
                     .status(ProviderStatus.FAILED)
                     .errorMessage(e.getMessage())
                     .build();
+        }
+    }
+
+    @Override
+    public ProviderTransactionDetails fetchStatus(String providerReferenceId) {
+        try {
+            RazorpayClient client = new RazorpayClient(keyId, keySecret);
+            Order order = client.orders.fetch(providerReferenceId);
+            String externalStatus = order.get("status");
+
+            return ProviderTransactionDetails.builder()
+                    .providerReferenceId(providerReferenceId)
+                    .externalStatus(externalStatus)
+                    .status(ProviderStatusMapper.map(externalStatus))
+                    .rawResponse(order.toString())
+                    .fetchedAt(java.time.LocalDateTime.now())
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to fetch Razorpay order status for {}", providerReferenceId, e);
+            throw new ProviderStatusException(
+                    "Unable to fetch Razorpay status for provider reference " + providerReferenceId, e);
         }
     }
 

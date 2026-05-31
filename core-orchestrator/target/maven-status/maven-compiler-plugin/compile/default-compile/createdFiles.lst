@@ -11,16 +11,11 @@ com\payorch\orchestrator\service\SmartRoutingStrategy.class
 com\payorch\outbox\service\impl\OutboxPatternWorker.class
 com\payorch\outbox\service\MessagePublisher.class
 com\payorch\outbox\repository\OutboxRepository.class
-com\payorch\providers\webhook\WebhookParserFactory.class
 com\payorch\ledger\repository\AccountRepository.class
-com\payorch\providers\webhook\consumer\WebhookEventConsumer.class
-com\payorch\providers\webhook\parser\StripeWebhookParser.class
-com\payorch\providers\webhook\WebhookParser.class
 com\payorch\orchestrator\model\PSPHealth.class
 com\payorch\ledger\exception\AccountNotFoundException.class
 com\payorch\orchestrator\model\PSPHealth$PSPHealthBuilder.class
 com\payorch\ledger\service\impl\LedgerServiceImpl.class
 com\payorch\outbox\model\OutboxEvent$OutboxEventBuilder.class
 com\payorch\orchestrator\service\PaymentStateManager.class
-com\payorch\providers\webhook\parser\RazorpayWebhookParser.class
 com\payorch\outbox\model\OutboxEvent.class

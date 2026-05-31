@@ -3,15 +3,19 @@ package com.payorch.providers.service.impl;
 import com.payorch.ledger.model.Transaction;
 import com.payorch.providers.dto.ProviderResponse;
 import com.payorch.providers.dto.ProviderStatus;
+import com.payorch.providers.dto.ProviderTransactionDetails;
+import com.payorch.providers.exception.ProviderStatusException;
 import com.payorch.providers.service.PaymentProvider;
 import com.stripe.Stripe;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class StripeProvider implements PaymentProvider {
 
     @Value("${payment.stripe.api-key}")
@@ -43,10 +47,31 @@ public class StripeProvider implements PaymentProvider {
                     .build();
 
         } catch (Exception e) {
+            log.error("Stripe payment creation failed for transaction {}", transaction.getId(), e);
             return ProviderResponse.builder()
                     .status(ProviderStatus.FAILED)
                     .errorMessage(e.getMessage())
                     .build();
+        }
+    }
+
+    @Override
+    public ProviderTransactionDetails fetchStatus(String providerReferenceId) {
+        try {
+            PaymentIntent intent = PaymentIntent.retrieve(providerReferenceId);
+            String externalStatus = intent.getStatus();
+
+            return ProviderTransactionDetails.builder()
+                    .providerReferenceId(providerReferenceId)
+                    .externalStatus(externalStatus)
+                    .status(ProviderStatusMapper.map(externalStatus))
+                    .rawResponse(intent.toJson())
+                    .fetchedAt(java.time.LocalDateTime.now())
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to fetch Stripe payment status for {}", providerReferenceId, e);
+            throw new ProviderStatusException(
+                    "Unable to fetch Stripe payment status for provider reference " + providerReferenceId, e);
         }
     }
 

@@ -4,11 +4,13 @@ package com.payorch.providers.service.impl;
 import com.payorch.ledger.model.Transaction;
 import com.payorch.providers.dto.ProviderResponse;
 import com.payorch.providers.dto.ProviderStatus;
+import com.payorch.providers.dto.ProviderTransactionDetails;
 import com.payorch.providers.service.PaymentProvider;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -37,6 +39,18 @@ public class MockPaymentProvider implements PaymentProvider {
                 .externalId("MOCK_REF_" + UUID.randomUUID().toString().substring(0, 8))
                 .status(ProviderStatus.SUCCESS)
                 .rawResponse("{\"message\": \"Mock success\"}")
+                .build();
+    }
+
+    @Override
+    public ProviderTransactionDetails fetchStatus(String providerReferenceId) {
+        log.info("Mock provider fetchStatus called for {}", providerReferenceId);
+        return ProviderTransactionDetails.builder()
+                .providerReferenceId(providerReferenceId)
+                .externalStatus("mocked")
+                .status(ProviderStatus.PENDING)
+                .rawResponse("{\"message\": \"Mock status lookup not implemented\"}")
+                .fetchedAt(LocalDateTime.now())
                 .build();
     }
 
