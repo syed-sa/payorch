@@ -1,7 +1,7 @@
 // Package: com.payorch.providers.service
 package com.payorch.providers.service;
 
-import com.payorch.ledger.model.Transaction;
+import com.payorch.model.Transaction;
 import com.payorch.providers.dto.ProviderResponse;
 import com.payorch.providers.dto.ProviderTransactionDetails;
 

@@ -2,9 +2,9 @@
 package com.payorch.orchestrator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.payorch.ledger.model.Transaction;
-import com.payorch.ledger.model.TransactionStatus;
 import com.payorch.ledger.repository.TransactionRepository;
+import com.payorch.model.Transaction;
+import com.payorch.model.TransactionStatus;
 import com.payorch.outbox.model.OutboxEvent;
 import com.payorch.outbox.repository.OutboxRepository;
 import com.payorch.providers.dto.ProviderResponse;

@@ -1,6 +1,6 @@
 package com.payorch.providers.service.impl;
 
-import com.payorch.ledger.model.Transaction;
+import com.payorch.model.Transaction;
 import com.payorch.providers.dto.ProviderResponse;
 import com.payorch.providers.dto.ProviderStatus;
 import com.payorch.providers.dto.ProviderTransactionDetails;

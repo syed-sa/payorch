@@ -1,6 +1,5 @@
 package com.payorch.reconciliation.step;
 
-import com.payorch.ledger.model.Transaction;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +8,8 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.stereotype.Component;
+
+import com.payorch.model.Transaction;
 
 import java.time.LocalDateTime;
 import java.util.Map;

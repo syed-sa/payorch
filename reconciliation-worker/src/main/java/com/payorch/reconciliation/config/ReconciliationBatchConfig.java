@@ -1,7 +1,7 @@
 // File: reconciliation-worker/src/main/java/com/payorch/reconciliation/config/ReconciliationBatchConfig.java
 package com.payorch.reconciliation.config;
 
-import com.payorch.ledger.model.Transaction;
+import com.payorch.model.Transaction;
 import com.payorch.reconciliation.domain.ReconciliationMismatch;
 import com.payorch.reconciliation.step.TransactionItemProcessor;
 import com.payorch.reconciliation.step.TransactionItemWriter;

@@ -2,8 +2,8 @@
 package com.payorch.orchestrator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.payorch.ledger.model.Transaction;
 import com.payorch.common.idempotency.IdempotencyManager;
+import com.payorch.model.Transaction;
 import com.payorch.providers.service.PaymentProvider;
 import com.payorch.providers.dto.ProviderResponse;
 import com.payorch.providers.dto.ProviderStatus;

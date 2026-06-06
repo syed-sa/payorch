@@ -1,4 +1,4 @@
-package com.payorch.ledger.model;
+package com.payorch.model;
 
 public enum TransactionStatus {
     INITIATED,

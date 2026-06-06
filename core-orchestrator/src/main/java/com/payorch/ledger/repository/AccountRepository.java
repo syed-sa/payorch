@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.payorch.ledger.model.Account;
+import com.payorch.model.Account;
 
 import java.util.Optional;
 import java.util.UUID;

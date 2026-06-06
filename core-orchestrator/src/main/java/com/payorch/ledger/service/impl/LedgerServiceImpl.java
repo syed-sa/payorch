@@ -7,12 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.payorch.ledger.exception.AccountNotFoundException;
 import com.payorch.ledger.exception.InsufficientFundsException;
-import com.payorch.ledger.model.Account;
-import com.payorch.ledger.model.LedgerEntry;
-import com.payorch.ledger.model.Transaction;
 import com.payorch.ledger.repository.AccountRepository;
 import com.payorch.ledger.repository.LedgerRepository;
 import com.payorch.ledger.service.LedgerService;
+import com.payorch.model.Account;
+import com.payorch.model.LedgerEntry;
+import com.payorch.model.Transaction;
 import com.payorch.outbox.model.OutboxEvent;
 import com.payorch.outbox.repository.OutboxRepository;
 

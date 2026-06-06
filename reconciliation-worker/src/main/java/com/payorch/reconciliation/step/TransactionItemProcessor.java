@@ -1,7 +1,7 @@
 package com.payorch.reconciliation.step;
 
-import com.payorch.ledger.model.Transaction;
-import com.payorch.ledger.model.TransactionStatus;
+import com.payorch.model.Transaction;
+import com.payorch.model.TransactionStatus;
 import com.payorch.providers.dto.ProviderTransactionDetails;
 import com.payorch.providers.factory.PaymentProviderFactory;
 import com.payorch.providers.service.PaymentProvider;
