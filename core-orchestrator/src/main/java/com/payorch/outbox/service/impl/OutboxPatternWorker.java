@@ -28,34 +28,36 @@ public class OutboxPatternWorker {
      * Polls the outbox table every 500 milliseconds.
      * Uses fixedDelay to ensure that the next execution execution loop doesn't start 
      * until the previous batch has fully finished.
+     * This to let other microservices know somme changes have been made to a transaction and to trigger downstream processing in an eventually consistent manner.
+     * e.g. Notifying the notification service to send an email to the customer about a payment status change, or letting the reporting service know to update the dashboard with the latest transaction information.
      */
-    @Scheduled(fixedDelay = 500)
-    public void pollAndPublishOutboxEvents() {
-        // We call a separate transactional method to limit the scope of the DB lock execution lifespan
-        List<OutboxEvent> pendingEvents = fetchAndLockBatch();
+    // @Scheduled(fixedDelay = 500)
+    // public void pollAndPublishOutboxEvents() {
+    //     // We call a separate transactional method to limit the scope of the DB lock execution lifespan
+    //     List<OutboxEvent> pendingEvents = fetchAndLockBatch();
         
-        if (pendingEvents.isEmpty()) {
-            return;
-        }
+    //     if (pendingEvents.isEmpty()) {
+    //         return;
+    //     }
 
-        log.debug("Outbox worker picked up {} events for processing.", pendingEvents.size());
+    //     log.debug("Outbox worker picked up {} events for processing.", pendingEvents.size());
 
-        for (OutboxEvent event : pendingEvents) {
-            try {
-                // 1. Publish payload securely to Kafka message broker
-                // We use the Outbox ID as the key to preserve regional execution order in Kafka partitions
-                messagePublisher.publish(PAYMENT_EVENTS_TOPIC, event.getId().toString(), event.getPayload());
+    //     for (OutboxEvent event : pendingEvents) {
+    //         try {
+    //             // 1. Publish payload securely to Kafka message broker
+    //             // We use the Outbox ID as the key to preserve regional execution order in Kafka partitions
+    //             messagePublisher.publish(PAYMENT_EVENTS_TOPIC, event.getId().toString(), event.getPayload());
 
-                // 2. Mark event as completed in database
-                updateEventStatus(event, "PROCESSED");
+    //             // 2. Mark event as completed in database
+    //             updateEventStatus(event, "PROCESSED");
 
-            } catch (Exception brokerException) {
-                log.error("Failed to stream outbox event: {}. Retrying on next batch run.", event.getId(), brokerException);
-                updateEventStatus(event, "FAILED");
-                // Note: We don't break the loop here so a single bad event doesn't block the remaining batch elements
-            }
-        }
-    }
+    //         } catch (Exception brokerException) {
+    //             log.error("Failed to stream outbox event: {}. Retrying on next batch run.", event.getId(), brokerException);
+    //             updateEventStatus(event, "FAILED");
+    //             // Note: We don't break the loop here so a single bad event doesn't block the remaining batch elements
+    //         }
+    //     }
+    // }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<OutboxEvent> fetchAndLockBatch() {

@@ -1,4 +1,4 @@
-package com.payorch.providers.model;
+package com.payorch.model;
 
 import jakarta.persistence.*;
 import lombok.*;
