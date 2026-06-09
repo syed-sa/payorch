@@ -1,5 +1,5 @@
 # File: [module-name]/Dockerfile
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Run as a non-root application user for container security compliance
