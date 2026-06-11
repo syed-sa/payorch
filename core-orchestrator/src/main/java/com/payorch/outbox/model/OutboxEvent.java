@@ -3,12 +3,18 @@ package com.payorch.outbox.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "outbox")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OutboxEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -17,6 +23,7 @@ public class OutboxEvent {
     @Column(name = "event_type", nullable = false)
     private String eventType;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String payload;
 
