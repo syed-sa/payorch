@@ -11,11 +11,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		"com.payorch.orchestrator.model",
 		"com.payorch.outbox.model"
 })
-@EnableJpaRepositories(basePackages = {
-		"com.payorch.repository",
-		"com.payorch.orchestrator.repository",
-		"com.payorch.outbox.repository"
-})
 public class PayorchApplication {
 
 	public static void main(String[] args) {
