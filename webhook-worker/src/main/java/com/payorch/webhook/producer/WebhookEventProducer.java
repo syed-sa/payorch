@@ -10,7 +10,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for producing webhook events to Kafka topics.
+ * Service for producing webhook events to a unified Kafka topic.
  * Ensures idempotent delivery with exactly-once semantics.
  */
 @Slf4j
@@ -20,49 +20,42 @@ public class WebhookEventProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Value("${kafka.topics.stripe-webhook}")
-    private String stripeTopicName;
-
-    @Value("${kafka.topics.razorpay-webhook}")
-    private String razorpayTopicName;
+    // Direct injection of our single unified topic channel
+    @Value("${kafka.topics.payment-webhooks}")
+    private String unifiedTopicName;
 
     /**
-     * Publishes raw Stripe webhook payload to Kafka topic
-     * 
-     * @param payload The raw webhook payload from Stripe
-     * @param eventId The unique event ID for idempotency
+     * Publishes raw Stripe webhook payload to the unified topic
      */
     public void publishStripeWebhook(String payload, String eventId) {
-        publishToKafka(stripeTopicName, eventId, payload, "stripe");
+        publishToKafka(unifiedTopicName, eventId, payload, "STRIPE");
     }
 
     /**
-     * Publishes raw Razorpay webhook payload to Kafka topic
-     * 
-     * @param payload The raw webhook payload from Razorpay
-     * @param eventId The unique event ID for idempotency
+     * Publishes raw Razorpay webhook payload to the unified topic
      */
     public void publishRazorpayWebhook(String payload, String eventId) {
-        publishToKafka(razorpayTopicName, eventId, payload, "razorpay");
+        publishToKafka(unifiedTopicName, eventId, payload, "RAZORPAY");
     }
 
     /**
-     * Internal method to publish to Kafka with idempotent key
+     * Internal method to publish to Kafka with partition key and provider route headers
      */
-    private void publishToKafka(String topic, String key, String payload, String provider) {
+    private void publishToKafka(String topic, String key, String payload, String providerType) {
         try {
             Message<String> message = MessageBuilder
                     .withPayload(payload)
                     .setHeader(KafkaHeaders.TOPIC, topic)
-                    .setHeader(KafkaHeaders.KEY, key)
-                    .setHeader("provider", provider)
-                    .setHeader("timestamp", System.currentTimeMillis())
+                    .setHeader(KafkaHeaders.KEY, key) // Keeps events ordered on the same partition
+                    .setHeader("X-Provider-Type", providerType) // Decoded dynamically by consumer factory
                     .build();
 
             kafkaTemplate.send(message);
-            log.info("Published {} webhook event to topic: {} with key: {}", provider, topic, key);
+            log.info("Successfully pushed {} event to unified stream '{}' using partition tracking key: {}", 
+                    providerType, topic, key);
+                    
         } catch (Exception e) {
-            log.error("Failed to publish {} webhook to Kafka topic: {}", provider, topic, e);
+            log.error("Failed to publish {} webhook to Kafka unified stream", providerType, e);
             throw new RuntimeException("Failed to publish webhook event to Kafka", e);
         }
     }

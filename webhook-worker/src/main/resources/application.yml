@@ -31,7 +31,7 @@ webhook:
     key-secret: ${RAZORPAY_KEY_SECRET:}
 
 # Kafka Topic Configuration
+# Inside application.yml across your modules
 kafka:
   topics:
-    stripe-webhook: stripe.webhook.events
-    razorpay-webhook: razorpay.webhook.events
+    payment-webhooks: "payment-provider-webhooks"
