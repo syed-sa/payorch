@@ -2,7 +2,9 @@
 package com.payorch.orchestrator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.payorch.ledger.repository.LedgerRepository;
 import com.payorch.ledger.repository.TransactionRepository;
+import com.payorch.model.LedgerEntry;
 import com.payorch.model.Transaction;
 import com.payorch.model.TransactionStatus;
 import com.payorch.outbox.model.OutboxEvent;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -24,6 +27,7 @@ public class PaymentStateManager {
     private final TransactionRepository transactionRepository;
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
+    private final LedgerRepository ledgerRepository;
 
     @Transactional
     public void initializePaymentState(Transaction transaction, String providerId) {
@@ -84,6 +88,7 @@ public class PaymentStateManager {
         // 3. Mutate the state machine data matrix values
         if ("SUCCESS".equalsIgnoreCase(targetStatus)) {
             txn.setStatus(TransactionStatus.SUCCESS);
+            generateLedgerEntries(txn);
             log.info("Transitioning transaction state to SUCCESS for system record tracking ID: {}", txn.getId());
         } else if ("FAILED".equalsIgnoreCase(targetStatus)) {
             txn.setStatus(TransactionStatus.FAILED);
@@ -116,4 +121,31 @@ public class PaymentStateManager {
             throw new RuntimeException("Failed to write to Outbox table", e);
         }
     }
+
+        private void generateLedgerEntries(Transaction transaction) {
+        BigDecimal amount = transaction.getAmount();
+
+        // Entry A: Debit the Sender's account
+        LedgerEntry debitEntry = LedgerEntry.builder()
+                .transaction(transaction)
+                .account(transaction.getSenderAccount())
+                .amount(amount.negate()) // Representing an outflow (-50.00)
+                .entryType("DEBIT")
+                .build();
+
+        // Entry B: Credit the Receiver's account
+        LedgerEntry creditEntry = LedgerEntry.builder()
+                .transaction(transaction)
+                .account(transaction.getReceiverAccount())
+                .amount(amount) // Representing an inflow (+50.00)
+                .entryType("CREDIT")
+                .build();
+
+        // Persist both rows atomically to PostgreSQL
+        ledgerRepository.save(debitEntry);
+        ledgerRepository.save(creditEntry);
+        
+        log.debug("Atomically generated Double-Entry Pair: Transaction ID {}", transaction.getId());
+    }
+    
 }
