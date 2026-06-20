@@ -1,42 +1,102 @@
-# Compiled class files
+# ==========================================
+# Java / Maven
+# ==========================================
+target/
 *.class
-
-# Logs
-*.log
-
-# BlueJ
-*.ctxt
-
-# Mobile Tools for Java
-.mtj.tmp/
 
 # Package files
 *.jar
 *.war
-*.nar
 *.ear
-*.zip
-*.tar.gz
-*.rar
+*.nar
 *.jar.original
 
-# Maven
-target/
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
 
-# IntelliJ
+# ==========================================
+# IDEs
+# ==========================================
+
+# IntelliJ IDEA
 .idea/
 *.iml
+out/
 
 # VS Code
 .vscode/
 
-# OS files
+# Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+
+# NetBeans
+nbproject/private/
+build/
+dist/
+
+# ==========================================
+# OS Files
+# ==========================================
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# JVM crash logs
+# ==========================================
+# Logs
+# ==========================================
+*.log
+logs/
+
+# ==========================================
+# Environment & Secrets
+# ==========================================
+.env
+.env.*
+*.env
+
+# Local configuration overrides
+application-local.properties
+application-dev.properties
+
+# ==========================================
+# Temporary Files
+# ==========================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ==========================================
+# JVM
+# ==========================================
 hs_err_pid*
 replay_pid*
 
-# Temporary files
-*.env
+# ==========================================
+# Docker
+# ==========================================
+docker-data/
+*.pid
+
+# ==========================================
+# Test Reports
+# ==========================================
+surefire-reports/
+failsafe-reports/
+
+# ==========================================
+# Coverage Reports
+# ==========================================
+coverage/
+jacoco.exec
+/site/
+
+# ==========================================
+# Mac/Linux Metadata
+# ==========================================
+.AppleDouble
+.LSOverride
