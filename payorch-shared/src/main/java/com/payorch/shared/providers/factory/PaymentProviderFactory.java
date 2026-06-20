@@ -1,11 +1,11 @@
-package com.payorch.providers.factory;
+package com.payorch.shared.providers.factory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.payorch.providers.service.PaymentProvider;
+import com.payorch.shared.providers.service.PaymentProvider;
 @Component
 @RequiredArgsConstructor
 public class PaymentProviderFactory {

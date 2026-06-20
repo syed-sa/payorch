@@ -3,10 +3,11 @@ package com.payorch.orchestrator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payorch.common.idempotency.IdempotencyManager;
-import com.payorch.model.Transaction;
-import com.payorch.providers.service.PaymentProvider;
-import com.payorch.providers.dto.ProviderResponse;
-import com.payorch.providers.dto.ProviderStatus;
+import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.ProviderResponse;
+import com.payorch.shared.providers.dto.ProviderStatus;
+import com.payorch.shared.providers.service.PaymentProvider;
+
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import lombok.RequiredArgsConstructor;

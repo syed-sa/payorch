@@ -3,13 +3,13 @@ package com.payorch.webhook.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.payorch.providers.dto.ProviderStatus;
+import com.payorch.shared.providers.dto.NormalizedWebhookData;
+import com.payorch.shared.providers.dto.ProviderStatus;
 import com.payorch.webhook.WebhookParser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import com.payorch.providers.dto.NormalizedWebhookData;
 @Slf4j
 @Component
 @RequiredArgsConstructor

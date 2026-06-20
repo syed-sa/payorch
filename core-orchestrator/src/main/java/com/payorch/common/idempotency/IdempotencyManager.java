@@ -1,7 +1,8 @@
 package com.payorch.common.idempotency;
 
 import com.payorch.ledger.repository.IdempotencyKeyRepository;
-import com.payorch.model.IdempotencyKey;
+import com.payorch.shared.model.IdempotencyKey;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

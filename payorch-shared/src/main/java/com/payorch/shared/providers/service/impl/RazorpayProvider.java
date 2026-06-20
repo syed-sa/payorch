@@ -1,4 +1,4 @@
-package com.payorch.providers.service.impl;
+package com.payorch.shared.providers.service.impl;
 
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
@@ -6,12 +6,13 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.payorch.model.Transaction;
-import com.payorch.providers.dto.ProviderResponse;
-import com.payorch.providers.dto.ProviderStatus;
-import com.payorch.providers.dto.ProviderTransactionDetails;
-import com.payorch.providers.exception.ProviderStatusException;
-import com.payorch.providers.service.PaymentProvider;
+import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.ProviderResponse;
+import com.payorch.shared.providers.dto.ProviderStatus;
+import com.payorch.shared.providers.dto.ProviderTransactionDetails;
+import com.payorch.shared.providers.exception.ProviderStatusException;
+import com.payorch.shared.providers.service.PaymentProvider;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Service

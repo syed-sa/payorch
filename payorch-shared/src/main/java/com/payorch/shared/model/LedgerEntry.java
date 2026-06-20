@@ -1,5 +1,5 @@
 
-package com.payorch.model;
+package com.payorch.shared.model;
 
 import jakarta.persistence.*;
 import lombok.*;

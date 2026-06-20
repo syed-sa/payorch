@@ -1,4 +1,4 @@
-package com.payorch.providers.dto;
+package com.payorch.shared.providers.dto;
 
 public enum ProviderStatus {
     SUCCESS,

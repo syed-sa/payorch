@@ -9,7 +9,7 @@ import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.stereotype.Component;
 
-import com.payorch.model.Transaction;
+import com.payorch.shared.model.Transaction;
 
 import java.time.LocalDateTime;
 import java.util.Map;

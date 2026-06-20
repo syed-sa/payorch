@@ -2,9 +2,10 @@
 package com.payorch.orchestrator.controller;
 
 import com.payorch.orchestrator.dto.CheckoutRequest;
-import com.payorch.model.Transaction;
 import com.payorch.orchestrator.service.PaymentOrchestrator;
-import com.payorch.providers.dto.ProviderResponse;
+import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.ProviderResponse;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class CheckoutController {
         // Hand control to your robust orchestration layer logic
         ProviderResponse response = paymentOrchestrator.processPayment(transaction);
 
-        if (response.getStatus() == com.payorch.providers.dto.ProviderStatus.FAILED) {
+        if (response.getStatus() == com.payorch.shared.providers.dto.ProviderStatus.FAILED) {
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(response);
         }
 

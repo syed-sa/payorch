@@ -1,11 +1,11 @@
 // Package: com.payorch.providers.mock
-package com.payorch.providers.service.impl;
+package com.payorch.shared.providers.service.impl;
 
-import com.payorch.model.Transaction;
-import com.payorch.providers.dto.ProviderResponse;
-import com.payorch.providers.dto.ProviderStatus;
-import com.payorch.providers.dto.ProviderTransactionDetails;
-import com.payorch.providers.service.PaymentProvider;
+import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.ProviderResponse;
+import com.payorch.shared.providers.dto.ProviderStatus;
+import com.payorch.shared.providers.dto.ProviderTransactionDetails;
+import com.payorch.shared.providers.service.PaymentProvider;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

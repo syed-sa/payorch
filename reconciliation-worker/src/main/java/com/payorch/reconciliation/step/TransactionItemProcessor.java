@@ -1,11 +1,12 @@
 package com.payorch.reconciliation.step;
 
-import com.payorch.model.Transaction;
-import com.payorch.model.TransactionStatus;
-import com.payorch.providers.dto.ProviderTransactionDetails;
-import com.payorch.providers.factory.PaymentProviderFactory;
-import com.payorch.providers.service.PaymentProvider;
 import com.payorch.reconciliation.domain.ReconciliationMismatch;
+import com.payorch.shared.model.Transaction;
+import com.payorch.shared.model.TransactionStatus;
+import com.payorch.shared.providers.dto.ProviderTransactionDetails;
+import com.payorch.shared.providers.factory.PaymentProviderFactory;
+import com.payorch.shared.providers.service.PaymentProvider;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;

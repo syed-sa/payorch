@@ -1,9 +1,9 @@
 // Package: com.payorch.providers.service
-package com.payorch.providers.service;
+package com.payorch.shared.providers.service;
 
-import com.payorch.model.Transaction;
-import com.payorch.providers.dto.ProviderResponse;
-import com.payorch.providers.dto.ProviderTransactionDetails;
+import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.ProviderResponse;
+import com.payorch.shared.providers.dto.ProviderTransactionDetails;
 
 public interface PaymentProvider {
 

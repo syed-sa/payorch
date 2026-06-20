@@ -2,7 +2,8 @@
 package com.payorch.orchestrator.service;
 
 import com.payorch.orchestrator.model.PSPHealth;
-import com.payorch.providers.service.PaymentProvider; // Using your interface
+import com.payorch.shared.providers.service.PaymentProvider;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

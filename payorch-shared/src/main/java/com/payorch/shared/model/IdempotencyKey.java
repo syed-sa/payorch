@@ -1,21 +1,10 @@
-package com.payorch.model;
+package com.payorch.shared.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
-/**
- * Idempotency Key Store for ensuring exactly-once payment processing semantics.
- * Persists request/response pairs to enable safe replay of idempotent payment
- * requests.
- *
- * Enterprise Pattern: Write-through cache (Redis + Database)
- * - Redis: Fast lookup for cached responses (TTL: 24h default)
- * - Database: Durability + audit trail + recovery
- *
- * @see com.payorch.common.idempotency.IdempotencyManager
- */
 @Entity
 @Table(name = "idempotency_keys", indexes = {
         @Index(name = "idx_idempotency_created_at", columnList = "created_at")
