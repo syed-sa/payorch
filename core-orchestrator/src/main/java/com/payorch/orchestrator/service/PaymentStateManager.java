@@ -2,11 +2,9 @@
 package com.payorch.orchestrator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.payorch.ledger.repository.LedgerRepository;
-import com.payorch.ledger.repository.TransactionRepository;
+import com.payorch.orchestrator.repository.TransactionRepository;
 import com.payorch.outbox.model.OutboxEvent;
 import com.payorch.outbox.repository.OutboxRepository;
-import com.payorch.shared.model.LedgerEntry;
 import com.payorch.shared.model.Transaction;
 import com.payorch.shared.model.TransactionStatus;
 import com.payorch.shared.providers.dto.ProviderResponse;
@@ -17,8 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -28,13 +27,13 @@ public class PaymentStateManager {
     private final TransactionRepository transactionRepository;
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
-    private final LedgerRepository ledgerRepository;
 
     @Transactional
     public void initializePaymentState(Transaction transaction, String providerId) {
         transaction.setProviderId(providerId);
         transaction.setStatus(TransactionStatus.INITIATED);
         transactionRepository.saveAndFlush(transaction);
+        createOutboxEvent("PAYMENT_INITIATED", transaction);
     }
 
     @Transactional
@@ -52,8 +51,7 @@ public class PaymentStateManager {
         txn.setUpdatedAt(LocalDateTime.now());
         transactionRepository.save(txn);
 
-        // Write to Outbox for downstream Ledger/Notification consumption (SAGA Pattern)
-        createOutboxEvent("PAYMENT_FINALIZED", txn);
+        createOutboxEvent(eventTypeFor(txn.getStatus()), txn);
     }
 
     @Transactional
@@ -72,45 +70,63 @@ public class PaymentStateManager {
      */
     @Transactional
     public void processWebhookStateTransition(String providerRefId, String targetStatus, String failureReason) {
-        log.info("Acquiring transaction record update boundary lock for Provider Ref: {}", providerRefId);
+        log.info("Processing provider webhook state transition for Provider Ref: {}", providerRefId);
 
-        // 1. Fetch the transaction using the unique reference assigned by Stripe/Razorpay
-        // Note: For high-concurrency assurance, ensure your repository layer implements findByProviderRefId
         Transaction txn = transactionRepository.findByProviderRefId(providerRefId)
-                .orElseThrow(() -> new IllegalArgumentException("No transaction found in Ledger matching Provider Reference: " + providerRefId));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No transaction found matching Provider Reference: " + providerRefId));
 
-        // 2. IDEMPOTENCY GUARD: If the transaction is already in a final state, discard the duplicate update safely
-        if (TransactionStatus.SUCCESS.equals(txn.getStatus()) || TransactionStatus.FAILED.equals(txn.getStatus())) {
-            log.info("Transaction {} is already processed and settled in a final state ({}). Discarding webhook stream event.", 
+        if (TransactionStatus.SUCCESS.equals(txn.getStatus())
+                || TransactionStatus.FAILED.equals(txn.getStatus())
+                || TransactionStatus.REFUNDED.equals(txn.getStatus())) {
+            log.info("Transaction {} is already in final state ({}). Discarding duplicate webhook event.",
                     txn.getId(), txn.getStatus());
             return;
         }
 
-        // 3. Mutate the state machine data matrix values
         if ("SUCCESS".equalsIgnoreCase(targetStatus)) {
             txn.setStatus(TransactionStatus.SUCCESS);
-            generateLedgerEntries(txn);
             log.info("Transitioning transaction state to SUCCESS for system record tracking ID: {}", txn.getId());
         } else if ("FAILED".equalsIgnoreCase(targetStatus)) {
             txn.setStatus(TransactionStatus.FAILED);
             txn.setFailureReason(failureReason != null ? failureReason : "WEBHOOK_ASYNC_GATEWAY_FAILURE_REPORT");
             log.warn("Transitioning transaction state to FAILED for system record tracking ID: {}. Reason: {}", txn.getId(), failureReason);
+        } else if ("PENDING".equalsIgnoreCase(targetStatus)) {
+            txn.setStatus(TransactionStatus.PENDING);
+            log.info("Transitioning transaction state to PENDING for system record tracking ID: {}", txn.getId());
+        } else if ("REFUNDED".equalsIgnoreCase(targetStatus)) {
+            txn.setStatus(TransactionStatus.REFUNDED);
+            log.info("Transitioning transaction state to REFUNDED for system record tracking ID: {}", txn.getId());
         } else {
-            log.info("Webhook event contains non-final state tracking update ({}). No state transition needed for tracking ID: {}", targetStatus, txn.getId());
-            return; // Exit without committing any unnecessary database mutations
+            log.info("Webhook event contains unsupported state tracking update ({}). No state transition needed for tracking ID: {}",
+                    targetStatus, txn.getId());
+            return;
         }
 
         txn.setUpdatedAt(LocalDateTime.now());
         transactionRepository.saveAndFlush(txn);
 
-        // 4. EMIT TRANSACTIONAL OUTBOX EVENT: Keep your downstream double-entry ledger ledgers and notifications perfectly synchronized
-        createOutboxEvent("PAYMENT_WEBHOOK_SETTLED", txn);
-        log.info("State synchronization successfully committed to ledger tables for transaction tracking tracking record ID: {}", txn.getId());
+        createOutboxEvent(eventTypeFor(txn.getStatus()), txn);
+        log.info("Webhook state synchronization committed for transaction tracking ID: {}", txn.getId());
     }
 
-    private void createOutboxEvent(String eventType, Object payloadData) {
+    private void createOutboxEvent(String eventType, Transaction transaction) {
         try {
-            String jsonPayload = objectMapper.writeValueAsString(payloadData);
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("transactionId", transaction.getId());
+            payload.put("idempotencyKey", transaction.getIdempotencyKey());
+            payload.put("status", transaction.getStatus());
+            payload.put("amount", transaction.getAmount());
+            payload.put("currency", transaction.getCurrency());
+            payload.put("providerId", transaction.getProviderId());
+            payload.put("providerRefId", transaction.getProviderRefId());
+            payload.put("merchantId", transaction.getMerchantId());
+            payload.put("customerReference", transaction.getCustomerReference());
+            payload.put("failureReason", transaction.getFailureReason());
+            payload.put("createdAt", transaction.getCreatedAt());
+            payload.put("updatedAt", transaction.getUpdatedAt());
+
+            String jsonPayload = objectMapper.writeValueAsString(payload);
             OutboxEvent event = OutboxEvent.builder()
                     .eventType(eventType)
                     .payload(jsonPayload)
@@ -123,30 +139,14 @@ public class PaymentStateManager {
         }
     }
 
-        private void generateLedgerEntries(Transaction transaction) {
-        BigDecimal amount = transaction.getAmount();
-
-        // Entry A: Debit the Sender's account
-        LedgerEntry debitEntry = LedgerEntry.builder()
-                .transaction(transaction)
-                .account(transaction.getSenderAccount())
-                .amount(amount.negate()) // Representing an outflow (-50.00)
-                .entryType("DEBIT")
-                .build();
-
-        // Entry B: Credit the Receiver's account
-        LedgerEntry creditEntry = LedgerEntry.builder()
-                .transaction(transaction)
-                .account(transaction.getReceiverAccount())
-                .amount(amount) // Representing an inflow (+50.00)
-                .entryType("CREDIT")
-                .build();
-
-        // Persist both rows atomically to PostgreSQL
-        ledgerRepository.save(debitEntry);
-        ledgerRepository.save(creditEntry);
-        
-        log.debug("Atomically generated Double-Entry Pair: Transaction ID {}", transaction.getId());
+    private String eventTypeFor(TransactionStatus status) {
+        return switch (status) {
+            case INITIATED -> "PAYMENT_INITIATED";
+            case PENDING -> "PAYMENT_PENDING";
+            case SUCCESS -> "PAYMENT_SUCCEEDED";
+            case FAILED -> "PAYMENT_FAILED";
+            case REFUNDED -> "PAYMENT_REFUNDED";
+        };
     }
     
 }
