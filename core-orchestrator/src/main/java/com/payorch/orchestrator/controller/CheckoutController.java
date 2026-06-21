@@ -40,7 +40,8 @@ public class CheckoutController {
         transaction.setIdempotencyKey(idempotencyKey);
         transaction.setAmount(request.getAmount());
         transaction.setCurrency(request.getCurrency());
-        // note: any baseline relational attributes can be appended here
+        transaction.setMerchantId(request.getMerchantId());
+        transaction.setCustomerReference(request.getCustomerReference());
 
         // Hand control to your robust orchestration layer logic
         ProviderResponse response = paymentOrchestrator.processPayment(transaction);

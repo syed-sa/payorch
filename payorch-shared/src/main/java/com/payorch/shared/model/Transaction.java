@@ -39,16 +39,14 @@ public class Transaction {
     @Column(name = "provider_ref_id")
     private String providerRefId;
 
+    @Column(name = "merchant_id")
+    private String merchantId;
+
+    @Column(name = "customer_reference")
+    private String customerReference;
+
     @Column(name = "failure_reason")
     private String failureReason;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_account_id")
-    private Account senderAccount;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_account_id")
-    private Account receiverAccount;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

@@ -23,7 +23,7 @@ public class WebhookEventConsumer {
 
     @KafkaListener(
             topics = "payment-provider-webhooks",
-            groupId = "payorch-ledger-update-group",
+            groupId = "payorch-transaction-state-group",
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void consumeWebhookPayloadStream(
@@ -41,7 +41,7 @@ public class WebhookEventConsumer {
             log.info("Decoded payload footprint. Provider ID: {}, Normalized Status Code: {}", 
                     normalizedData.getProviderRefId(), normalizedData.getStatus());
 
-            // 2. Cross boundary domain function call -> Invoking Orchestrator State Engine to finalize the ledger
+            // 2. Cross boundary domain function call -> update the orchestration transaction state
             stateManager.processWebhookStateTransition(
                     normalizedData.getProviderRefId(),
                     normalizedData.getStatus().name(),
