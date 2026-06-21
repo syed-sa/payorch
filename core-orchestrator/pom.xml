@@ -13,7 +13,7 @@
 
     <artifactId>core-orchestrator</artifactId>
     <name>Payorch Core Orchestrator</name>
-    <description>Main payment orchestration service with ledger management</description>
+    <description>Main payment orchestration service</description>
     <packaging>jar</packaging>
 
     <dependencies>
