@@ -8,7 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableJpaRepositories(basePackages = {
-		"com.payorch.ledger.repository",
+		"com.payorch.orchestrator.repository",
+		"com.payorch.common.idempotency",
 		"com.payorch.outbox.repository"
 })
 public class PayorchApplication {

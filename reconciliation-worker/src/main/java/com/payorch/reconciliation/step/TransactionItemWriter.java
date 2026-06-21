@@ -18,7 +18,7 @@ public class TransactionItemWriter implements ItemWriter<ReconciliationMismatch>
 
     @Override
     public void write(Chunk<? extends ReconciliationMismatch> chunk) throws Exception {
-        log.info("Batch writer flushing chunk of {} flagged accounting variances to storage layers.", chunk.size());
+        log.info("Batch writer flushing chunk of {} reconciliation mismatches to storage layers.", chunk.size());
         
         // 1. Commit all mismatches in a highly performant bulk batch save
         mismatchRepository.saveAll(chunk.getItems());

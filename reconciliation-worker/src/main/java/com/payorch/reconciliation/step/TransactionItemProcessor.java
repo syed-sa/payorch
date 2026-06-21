@@ -30,8 +30,7 @@ public class TransactionItemProcessor implements ItemProcessor<Transaction, Reco
 
         ProviderTransactionDetails details = provider.fetchStatus(txn.getProviderRefId());
 
-        // Cross-check: Compare our database representation against the true ledger
-        // statement from the bank
+        // Cross-check: compare internal orchestration state against the provider state.
         if (TransactionStatus.PENDING.name().equals(txn.getStatus().name())
                 && "SUCCESS".equals(details.getExternalStatus())) {
             log.warn(

@@ -7,7 +7,7 @@ spring:
     name: payorch-reconciliation-worker
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/payorch_ledger
+    url: jdbc:postgresql://localhost:5432/payorch_db
     username: postgres
     password: password
     driver-class-name: org.postgresql.Driver

@@ -1,6 +1,5 @@
 package com.payorch.common.idempotency;
 
-import com.payorch.ledger.repository.IdempotencyKeyRepository;
 import com.payorch.shared.model.IdempotencyKey;
 
 import lombok.RequiredArgsConstructor;

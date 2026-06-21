@@ -1,4 +1,3 @@
-// Package: com.payorch.Ledger.repository
 package com.payorch.outbox.repository;
 
 import jakarta.persistence.LockModeType;
