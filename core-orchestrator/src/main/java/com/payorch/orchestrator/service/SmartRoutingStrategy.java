@@ -39,7 +39,8 @@ public class SmartRoutingStrategy {
     }
 
     private boolean isProviderAvailable(PaymentProvider provider) {
-        return metricsService.getHealth(provider.getProviderId()).isActive();
+        PSPHealth pspHealth = metricsService.getHealth(provider.getProviderId());
+        return pspHealth != null && pspHealth.isActive();
     }
 
     private double calculateScore(PaymentProvider provider) {
