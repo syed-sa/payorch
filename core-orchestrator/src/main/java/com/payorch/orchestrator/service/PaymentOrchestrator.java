@@ -4,6 +4,7 @@ package com.payorch.orchestrator.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payorch.common.idempotency.IdempotencyManager;
 import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.PaymentExecutionRequest;
 import com.payorch.shared.providers.dto.ProviderResponse;
 import com.payorch.shared.providers.dto.ProviderStatus;
 import com.payorch.shared.providers.service.PaymentProvider;
@@ -28,7 +29,7 @@ public class PaymentOrchestrator {
     private final ObjectMapper objectMapper;
     private final CircuitBreakerRegistry circuitBreakerRegistry;
 
-    public ProviderResponse processPayment(Transaction transaction) {
+    public ProviderResponse processPayment(Transaction transaction, String paymentMethodToken) {
         String key = transaction.getIdempotencyKey();
 
         // 1. Idempotency Check
@@ -49,7 +50,7 @@ public class PaymentOrchestrator {
             List<String> attemptedProviderIds = new ArrayList<>();
 
             // 4. Execute external payment with dynamic failover capabilities
-            ProviderResponse response = executeWithFailover(transaction, attemptedProviderIds);
+            ProviderResponse response = executeWithFailover(transaction, paymentMethodToken, attemptedProviderIds);
 
             // 5. Store Final Idempotency Payload on Success/Controlled failure
             idempotencyManager.saveResponse(key, objectMapper.writeValueAsString(response));
@@ -80,7 +81,10 @@ public class PaymentOrchestrator {
      * If a provider fails or its circuit is open, it catches the error and
      * dynamically retries with a backup.
      */
-    private ProviderResponse executeWithFailover(Transaction transaction, List<String> attemptedProviderIds) {
+    private ProviderResponse executeWithFailover(
+            Transaction transaction,
+            String paymentMethodToken,
+            List<String> attemptedProviderIds) {
         // Get the best provider excluding ones we already tried in this request cycle
         PaymentProvider provider = routingStrategy.selectBestProviderExcluding(attemptedProviderIds);
         String providerId = provider.getProviderId();
@@ -99,7 +103,8 @@ public class PaymentOrchestrator {
 
             // Decorate and execute the network call inside the Resilience4j Circuit Breaker
             // context
-            ProviderResponse response = circuitBreaker.executeSupplier(() -> provider.process(transaction));
+            PaymentExecutionRequest request = new PaymentExecutionRequest(transaction, paymentMethodToken);
+            ProviderResponse response = circuitBreaker.executeSupplier(() -> provider.process(request));
 
             // Record successful/handled response to DB & Outbox
             stateManager.finalizePaymentState(transaction, response);
@@ -115,7 +120,7 @@ public class PaymentOrchestrator {
             }
 
             // RECURSIVE FAILOVER: Try the next best provider smoothly
-            return executeWithFailover(transaction, attemptedProviderIds);
+            return executeWithFailover(transaction, paymentMethodToken, attemptedProviderIds);
         }
     }
 
