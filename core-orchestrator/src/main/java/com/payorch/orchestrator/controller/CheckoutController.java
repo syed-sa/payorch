@@ -35,6 +35,13 @@ public class CheckoutController {
                             .build());
         }
 
+        if (request.getPaymentMethodToken() == null || request.getPaymentMethodToken().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ProviderResponse.builder()
+                            .errorMessage("Mandatory payment method token missing")
+                            .build());
+        }
+
         // Map the payload directly into your Transaction entity
         Transaction transaction = new Transaction();
         transaction.setIdempotencyKey(idempotencyKey);
@@ -44,7 +51,7 @@ public class CheckoutController {
         transaction.setCustomerReference(request.getCustomerReference());
 
         // Hand control to your robust orchestration layer logic
-        ProviderResponse response = paymentOrchestrator.processPayment(transaction);
+        ProviderResponse response = paymentOrchestrator.processPayment(transaction, request.getPaymentMethodToken());
 
         if (response.getStatus() == com.payorch.shared.providers.dto.ProviderStatus.FAILED) {
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(response);
