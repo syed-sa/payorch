@@ -10,4 +10,5 @@ public class CheckoutRequest {
     private String currency;
     private String merchantId;
     private String customerReference;
+    private String paymentMethodToken;
 }

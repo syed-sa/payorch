@@ -1,14 +1,13 @@
-// Package: com.payorch.providers.service
 package com.payorch.shared.providers.service;
 
-import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.PaymentExecutionRequest;
 import com.payorch.shared.providers.dto.ProviderResponse;
 import com.payorch.shared.providers.dto.ProviderTransactionDetails;
 
 public interface PaymentProvider {
 
     // Primary method to initiate a payment with a PSP
-    ProviderResponse process(Transaction transaction);
+    ProviderResponse process(PaymentExecutionRequest request);
 
     // Returns current status for an existing provider reference ID
     ProviderTransactionDetails fetchStatus(String providerReferenceId);
