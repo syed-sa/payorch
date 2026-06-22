@@ -1,11 +1,13 @@
 package com.payorch.shared.providers.service.impl;
 
 import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.PaymentExecutionRequest;
 import com.payorch.shared.providers.dto.ProviderResponse;
 import com.payorch.shared.providers.dto.ProviderStatus;
 import com.payorch.shared.providers.dto.ProviderTransactionDetails;
 import com.payorch.shared.providers.exception.ProviderStatusException;
 import com.payorch.shared.providers.service.PaymentProvider;
+import com.payorch.shared.providers.util.TokenMaskingUtil;
 import com.stripe.Stripe;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
@@ -27,7 +29,12 @@ public class StripeProvider implements PaymentProvider {
     }
 
     @Override
-    public ProviderResponse process(Transaction transaction) {
+    public ProviderResponse process(PaymentExecutionRequest request) {
+        validatePaymentMethodToken(request.paymentMethodToken());
+        Transaction transaction = request.transaction();
+        log.info("Stripe processing transaction {} using payment method token {}",
+                transaction.getId(), TokenMaskingUtil.mask(request.paymentMethodToken()));
+
         try {
             // Stripe expects amounts in cents (e.g., 10.00 becomes 1000)
             long amountInCents = transaction.getAmount().multiply(new java.math.BigDecimal(100)).longValue();
@@ -35,6 +42,7 @@ public class StripeProvider implements PaymentProvider {
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                     .setAmount(amountInCents)
                     .setCurrency(transaction.getCurrency().toLowerCase())
+                    .setPaymentMethod(request.paymentMethodToken())
                     .putMetadata("transaction_id", transaction.getId().toString())
                     .build();
 
@@ -52,6 +60,12 @@ public class StripeProvider implements PaymentProvider {
                     .status(ProviderStatus.FAILED)
                     .errorMessage(e.getMessage())
                     .build();
+        }
+    }
+
+    private void validatePaymentMethodToken(String paymentMethodToken) {
+        if (paymentMethodToken == null || paymentMethodToken.isBlank()) {
+            throw new IllegalArgumentException("Payment method token is mandatory");
         }
     }
 

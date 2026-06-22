@@ -1,11 +1,12 @@
-// Package: com.payorch.providers.mock
 package com.payorch.shared.providers.service.impl;
 
 import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.PaymentExecutionRequest;
 import com.payorch.shared.providers.dto.ProviderResponse;
 import com.payorch.shared.providers.dto.ProviderStatus;
 import com.payorch.shared.providers.dto.ProviderTransactionDetails;
 import com.payorch.shared.providers.service.PaymentProvider;
+import com.payorch.shared.providers.util.TokenMaskingUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,11 @@ import java.util.UUID;
 public class MockPaymentProvider implements PaymentProvider {
 
     @Override
-    public ProviderResponse process(Transaction transaction) {
-        log.info("Mock Provider processing transaction: {}", transaction.getId());
+    public ProviderResponse process(PaymentExecutionRequest request) {
+        validatePaymentMethodToken(request.paymentMethodToken());
+        Transaction transaction = request.transaction();
+        log.info("Mock Provider processing transaction {} using payment method token {}",
+                transaction.getId(), TokenMaskingUtil.mask(request.paymentMethodToken()));
 
         // Simulate a tiny network delay
         try {
@@ -40,6 +44,12 @@ public class MockPaymentProvider implements PaymentProvider {
                 .status(ProviderStatus.SUCCESS)
                 .rawResponse("{\"message\": \"Mock success\"}")
                 .build();
+    }
+
+    private void validatePaymentMethodToken(String paymentMethodToken) {
+        if (paymentMethodToken == null || paymentMethodToken.isBlank()) {
+            throw new IllegalArgumentException("Payment method token is mandatory");
+        }
     }
 
     @Override

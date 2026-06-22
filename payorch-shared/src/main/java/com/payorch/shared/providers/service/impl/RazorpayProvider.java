@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.payorch.shared.model.Transaction;
+import com.payorch.shared.providers.dto.PaymentExecutionRequest;
 import com.payorch.shared.providers.dto.ProviderResponse;
 import com.payorch.shared.providers.dto.ProviderStatus;
 import com.payorch.shared.providers.dto.ProviderTransactionDetails;
 import com.payorch.shared.providers.exception.ProviderStatusException;
 import com.payorch.shared.providers.service.PaymentProvider;
+import com.payorch.shared.providers.util.TokenMaskingUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +28,12 @@ public class RazorpayProvider implements PaymentProvider {
     private String keySecret;
 
     @Override
-    public ProviderResponse process(Transaction transaction) {
+    public ProviderResponse process(PaymentExecutionRequest request) {
+        validatePaymentMethodToken(request.paymentMethodToken());
+        Transaction transaction = request.transaction();
+        log.info("Razorpay processing transaction {} using payment method token {}",
+                transaction.getId(), TokenMaskingUtil.mask(request.paymentMethodToken()));
+
         try {
             RazorpayClient client = new RazorpayClient(keyId, keySecret);
 
@@ -50,6 +57,12 @@ public class RazorpayProvider implements PaymentProvider {
                     .status(ProviderStatus.FAILED)
                     .errorMessage(e.getMessage())
                     .build();
+        }
+    }
+
+    private void validatePaymentMethodToken(String paymentMethodToken) {
+        if (paymentMethodToken == null || paymentMethodToken.isBlank()) {
+            throw new IllegalArgumentException("Payment method token is mandatory");
         }
     }
 
