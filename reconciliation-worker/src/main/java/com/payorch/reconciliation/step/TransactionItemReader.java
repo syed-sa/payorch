@@ -28,7 +28,7 @@ public class TransactionItemReader implements ItemStreamReader<Transaction> {
         this.delegate = new JpaPagingItemReaderBuilder<Transaction>()
                 .name("reconciliationTransactionReader")
                 .entityManagerFactory(entityManagerFactory)
-                .queryString("SELECT t FROM Transaction t WHERE t.updatedAt >= :lookbackTime AND t.status = 'PENDING'")
+                .queryString("SELECT t FROM Transaction t WHERE t.updatedAt >= :lookbackTime")
                 .parameterValues(Map.of("lookbackTime", lookbackThreshold))
                 .pageSize(PAGE_SIZE)
                 .build();

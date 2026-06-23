@@ -15,6 +15,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class ReconciliationBatchConfig {
     @Bean
     public Step reconciliationStep() {
         return new StepBuilder("reconciliationStep", jobRepository)
-                .<Transaction, ReconciliationMismatch>chunk(CHUNK_SIZE, transactionManager)
+                .<Transaction, List<ReconciliationMismatch>>chunk(CHUNK_SIZE, transactionManager)
                 .reader(itemReader)
                 .processor(itemProcessor)
                 .writer(itemWriter)

@@ -40,6 +40,7 @@ CREATE TABLE reconciliation_mismatches (
     provider_ref_id VARCHAR(255),
     internal_status VARCHAR(20) NOT NULL,
     external_status VARCHAR(20) NOT NULL,
+    mismatch_type VARCHAR(50) NOT NULL DEFAULT 'STATUS_MISMATCH',
     resolution_status VARCHAR(50) NOT NULL DEFAULT 'PENDING_INVESTIGATION',
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

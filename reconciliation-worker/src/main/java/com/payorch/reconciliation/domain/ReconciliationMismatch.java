@@ -31,6 +31,10 @@ public class ReconciliationMismatch {
     @Column(name = "external_status", nullable = false)
     private String externalStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mismatch_type", nullable = false)
+    private MismatchType mismatchType;
+
     @Column(name = "resolution_status", nullable = false)
     private String resolutionStatus; // e.g., "PENDING_INVESTIGATION", "AUTO_RESOLVED"
 
