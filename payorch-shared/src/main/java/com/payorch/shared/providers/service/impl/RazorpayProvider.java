@@ -16,6 +16,7 @@ import com.payorch.shared.providers.service.PaymentProvider;
 import com.payorch.shared.providers.util.TokenMaskingUtil;
 
 import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
 
 @Service
 @Slf4j
@@ -76,6 +77,7 @@ public class RazorpayProvider implements PaymentProvider {
             return ProviderTransactionDetails.builder()
                     .providerReferenceId(providerReferenceId)
                     .externalStatus(externalStatus)
+                    .amount(BigDecimal.valueOf(((Number) order.get("amount")).longValue(), 2))
                     .status(ProviderStatusMapper.map(externalStatus))
                     .rawResponse(order.toString())
                     .fetchedAt(java.time.LocalDateTime.now())

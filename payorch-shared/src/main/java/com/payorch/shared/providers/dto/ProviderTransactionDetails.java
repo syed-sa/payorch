@@ -1,6 +1,7 @@
 package com.payorch.shared.providers.dto;
 import lombok.Builder;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 public class ProviderTransactionDetails {
     private String providerReferenceId;
     private String externalStatus;
+    private BigDecimal amount;
     private String rawResponse;
     private LocalDateTime fetchedAt;
     private ProviderStatus status;
