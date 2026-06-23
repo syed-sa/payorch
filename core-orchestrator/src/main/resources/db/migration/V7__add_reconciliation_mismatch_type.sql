@@ -1,0 +1,2 @@
+ALTER TABLE reconciliation_mismatches
+    ADD COLUMN IF NOT EXISTS mismatch_type VARCHAR(50) NOT NULL DEFAULT 'STATUS_MISMATCH';
