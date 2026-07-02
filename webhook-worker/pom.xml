@@ -35,18 +35,6 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
-        <!-- Stripe SDK -->
-        <dependency>
-            <groupId>com.stripe</groupId>
-            <artifactId>stripe-java</artifactId>
-        </dependency>
-
-        <!-- Razorpay SDK -->
-        <dependency>
-            <groupId>com.razorpay</groupId>
-            <artifactId>razorpay-java</artifactId>
-        </dependency>
-
         <!-- Apache Commons Codec for HMAC -->
         <dependency>
             <groupId>commons-codec</groupId>
@@ -64,6 +52,21 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.payorch</groupId>
+            <artifactId>payorch-shared</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.payorch</groupId>
+            <artifactId>payorch-providers</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Testing -->

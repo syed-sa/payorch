@@ -44,16 +44,6 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
-        <!-- Payment Providers -->
-        <dependency>
-            <groupId>com.stripe</groupId>
-            <artifactId>stripe-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.razorpay</groupId>
-            <artifactId>razorpay-java</artifactId>
-        </dependency>
-
         <!-- Kafka -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -98,6 +88,13 @@
         <dependency>
             <groupId>com.payorch</groupId>
             <artifactId>payorch-shared</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.payorch</groupId>
+            <artifactId>payorch-providers</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
             <scope>compile</scope>

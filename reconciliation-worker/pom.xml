@@ -62,6 +62,13 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.payorch</groupId>
+            <artifactId>payorch-providers</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- Testing -->
         <dependency>

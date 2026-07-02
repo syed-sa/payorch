@@ -21,6 +21,7 @@
 
     <modules>
         <module>payorch-shared</module>
+        <module>payorch-providers</module>
         <module>core-orchestrator</module>
         <module>webhook-worker</module>
         <module>reconciliation-worker</module>
