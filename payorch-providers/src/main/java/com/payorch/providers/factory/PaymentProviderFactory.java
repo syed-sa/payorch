@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.payorch.shared.providers.service.PaymentProvider;
+import com.payorch.shared.service.PaymentProvider;
 
 @Component
 @RequiredArgsConstructor

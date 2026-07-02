@@ -1,7 +1,7 @@
 package com.payorch.webhook.consumer;
 
 import com.payorch.orchestrator.service.PaymentStateManager;
-import com.payorch.shared.providers.dto.NormalizedWebhookData;
+import com.payorch.shared.dto.NormalizedWebhookData;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

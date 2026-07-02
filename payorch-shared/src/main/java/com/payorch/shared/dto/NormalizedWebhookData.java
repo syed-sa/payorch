@@ -1,4 +1,4 @@
-package com.payorch.shared.providers.dto;
+package com.payorch.shared.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

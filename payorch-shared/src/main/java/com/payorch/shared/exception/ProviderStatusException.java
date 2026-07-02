@@ -1,4 +1,4 @@
-package com.payorch.shared.providers.exception;
+package com.payorch.shared.exception;
 
 public class ProviderStatusException extends RuntimeException {
     public ProviderStatusException(String message) {

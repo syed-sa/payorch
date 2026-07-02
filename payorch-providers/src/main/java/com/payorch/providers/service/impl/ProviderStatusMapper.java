@@ -2,7 +2,7 @@ package com.payorch.providers.service.impl;
 
 import java.util.Locale;
 
-import com.payorch.shared.providers.dto.ProviderStatus;
+import com.payorch.shared.dto.ProviderStatus;
 
 public final class ProviderStatusMapper {
 

@@ -3,8 +3,8 @@ package com.payorch.webhook.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.payorch.shared.providers.dto.NormalizedWebhookData;
-import com.payorch.shared.providers.dto.ProviderStatus;
+import com.payorch.shared.dto.NormalizedWebhookData;
+import com.payorch.shared.dto.ProviderStatus;
 import com.payorch.webhook.WebhookParser;
 
 import lombok.RequiredArgsConstructor;

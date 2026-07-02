@@ -1,7 +1,7 @@
 // File: core-orchestrator/src/main/java/com/payorch/providers/webhook/WebhookParser.java
 package com.payorch.webhook;
 
-import com.payorch.shared.providers.dto.NormalizedWebhookData;
+import com.payorch.shared.dto.NormalizedWebhookData;
 
 public interface WebhookParser {
     String getSupportedProvider();

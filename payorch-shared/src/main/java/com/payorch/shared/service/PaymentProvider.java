@@ -1,8 +1,8 @@
-package com.payorch.shared.providers.service;
+package com.payorch.shared.service;
 
-import com.payorch.shared.providers.dto.PaymentExecutionRequest;
-import com.payorch.shared.providers.dto.ProviderResponse;
-import com.payorch.shared.providers.dto.ProviderTransactionDetails;
+import com.payorch.shared.dto.PaymentExecutionRequest;
+import com.payorch.shared.dto.ProviderResponse;
+import com.payorch.shared.dto.ProviderTransactionDetails;
 
 public interface PaymentProvider {
 

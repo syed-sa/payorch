@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payorch.orchestrator.repository.TransactionRepository;
 import com.payorch.outbox.model.OutboxEvent;
 import com.payorch.outbox.repository.OutboxRepository;
+import com.payorch.shared.dto.ProviderResponse;
+import com.payorch.shared.dto.ProviderStatus;
 import com.payorch.shared.model.Transaction;
 import com.payorch.shared.model.TransactionStatus;
-import com.payorch.shared.providers.dto.ProviderResponse;
-import com.payorch.shared.providers.dto.ProviderStatus;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

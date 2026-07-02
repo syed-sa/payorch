@@ -1,4 +1,4 @@
-package com.payorch.shared.providers.util;
+package com.payorch.shared.util;
 
 public final class TokenMaskingUtil {
 

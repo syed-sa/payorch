@@ -1,4 +1,4 @@
-package com.payorch.shared.providers.dto;
+package com.payorch.shared.dto;
 import lombok.Builder;
 import lombok.Data;
 import java.math.BigDecimal;

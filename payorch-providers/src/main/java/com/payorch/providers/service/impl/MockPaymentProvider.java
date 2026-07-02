@@ -1,12 +1,12 @@
 package com.payorch.providers.service.impl;
 
+import com.payorch.shared.dto.PaymentExecutionRequest;
+import com.payorch.shared.dto.ProviderResponse;
+import com.payorch.shared.dto.ProviderStatus;
+import com.payorch.shared.dto.ProviderTransactionDetails;
 import com.payorch.shared.model.Transaction;
-import com.payorch.shared.providers.dto.PaymentExecutionRequest;
-import com.payorch.shared.providers.dto.ProviderResponse;
-import com.payorch.shared.providers.dto.ProviderStatus;
-import com.payorch.shared.providers.dto.ProviderTransactionDetails;
-import com.payorch.shared.providers.service.PaymentProvider;
-import com.payorch.shared.providers.util.TokenMaskingUtil;
+import com.payorch.shared.service.PaymentProvider;
+import com.payorch.shared.util.TokenMaskingUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
