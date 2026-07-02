@@ -54,16 +54,6 @@
             <artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
 
-        <!-- Payment Providers -->
-        <dependency>
-            <groupId>com.stripe</groupId>
-            <artifactId>stripe-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.razorpay</groupId>
-            <artifactId>razorpay-java</artifactId>
-        </dependency>
-
         <!-- Utilities -->
         <dependency>
             <groupId>org.projectlombok</groupId>
