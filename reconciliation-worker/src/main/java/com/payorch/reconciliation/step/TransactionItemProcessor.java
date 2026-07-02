@@ -3,10 +3,10 @@ package com.payorch.reconciliation.step;
 import com.payorch.providers.factory.PaymentProviderFactory;
 import com.payorch.reconciliation.domain.MismatchType;
 import com.payorch.reconciliation.domain.ReconciliationMismatch;
+import com.payorch.shared.contract.PaymentProvider;
 import com.payorch.shared.dto.ProviderTransactionDetails;
 import com.payorch.shared.exception.ProviderStatusException;
 import com.payorch.shared.model.Transaction;
-import com.payorch.shared.service.PaymentProvider;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

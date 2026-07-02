@@ -1,4 +1,4 @@
-package com.payorch.shared.service;
+package com.payorch.shared.contract;
 
 import com.payorch.shared.dto.PaymentExecutionRequest;
 import com.payorch.shared.dto.ProviderResponse;

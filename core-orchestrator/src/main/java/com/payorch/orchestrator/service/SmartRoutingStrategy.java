@@ -2,7 +2,7 @@
 package com.payorch.orchestrator.service;
 
 import com.payorch.orchestrator.model.PSPHealth;
-import com.payorch.shared.service.PaymentProvider;
+import com.payorch.shared.contract.PaymentProvider;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

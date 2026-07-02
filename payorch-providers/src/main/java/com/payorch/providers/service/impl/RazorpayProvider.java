@@ -6,13 +6,13 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.payorch.shared.contract.PaymentProvider;
 import com.payorch.shared.dto.PaymentExecutionRequest;
 import com.payorch.shared.dto.ProviderResponse;
 import com.payorch.shared.dto.ProviderStatus;
 import com.payorch.shared.dto.ProviderTransactionDetails;
 import com.payorch.shared.exception.ProviderStatusException;
 import com.payorch.shared.model.Transaction;
-import com.payorch.shared.service.PaymentProvider;
 import com.payorch.shared.util.TokenMaskingUtil;
 
 import lombok.extern.slf4j.Slf4j;
