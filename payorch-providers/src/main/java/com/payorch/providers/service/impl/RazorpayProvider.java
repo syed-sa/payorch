@@ -43,6 +43,10 @@ public class RazorpayProvider implements PaymentProvider {
             orderRequest.put("currency", transaction.getCurrency());
             orderRequest.put("receipt", transaction.getId().toString());
 
+            JSONObject notes = new JSONObject();
+            notes.put("orchestrator_transaction_id", transaction.getId().toString());
+            orderRequest.put("notes", notes);
+
             Order order = client.orders.create(orderRequest);
 
             return ProviderResponse.builder()

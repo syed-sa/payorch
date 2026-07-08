@@ -44,6 +44,7 @@ public class StripeProvider implements PaymentProvider {
                     .setCurrency(transaction.getCurrency().toLowerCase())
                     .setPaymentMethod(request.paymentMethodToken())
                     .putMetadata("transaction_id", transaction.getId().toString())
+                    .putMetadata("orchestrator_transaction_id", transaction.getId().toString())
                     .build();
 
             PaymentIntent intent = PaymentIntent.create(params);
