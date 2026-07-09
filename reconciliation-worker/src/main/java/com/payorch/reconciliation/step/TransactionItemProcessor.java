@@ -1,21 +1,20 @@
 package com.payorch.reconciliation.step;
 
-import com.payorch.providers.factory.PaymentProviderFactory;
 import com.payorch.reconciliation.domain.MismatchType;
 import com.payorch.reconciliation.domain.ReconciliationMismatch;
-import com.payorch.shared.contract.PaymentProvider;
-import com.payorch.shared.dto.ProviderTransactionDetails;
-import com.payorch.shared.exception.ProviderStatusException;
+import com.payorch.reconciliation.repository.SettlementRecordRepository;
+import com.payorch.shared.model.SettlementRecord;
 import com.payorch.shared.model.Transaction;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -25,51 +24,43 @@ public class TransactionItemProcessor implements ItemProcessor<Transaction, List
     private static final String PENDING_INVESTIGATION = "PENDING_INVESTIGATION";
     private static final String UNKNOWN_EXTERNAL_STATUS = "UNKNOWN";
 
-    // In a production setup, inject your Strategy Factory here to switch between
-    // Stripe and Razorpay Client APIs
-    private final PaymentProviderFactory providerFactory;
+    private final SettlementRecordRepository settlementRepository;
 
     @Override
     public List<ReconciliationMismatch> process(Transaction txn) {
-        log.debug("Executing status verification check for Transaction: {}", txn.getId());
+        log.debug("Executing settlement verification check for Transaction: {}", txn.getId());
 
-        PaymentProvider provider = providerFactory.get(txn.getProviderId());
-
-        ProviderTransactionDetails details;
-        try {
-            details = provider.fetchStatus(txn.getProviderRefId());
-        } catch (ProviderStatusException e) {
-            log.warn("Reconciliation mismatch detected. type={}, transactionId={}, providerRefId={}",
-                    MismatchType.MISSING_PROVIDER_RECORD, txn.getId(), txn.getProviderRefId());
-            return List.of(buildMismatch(txn, UNKNOWN_EXTERNAL_STATUS, MismatchType.MISSING_PROVIDER_RECORD));
-        }
-
-        if (details == null || (details.getStatus() == null && details.getExternalStatus() == null)) {
+        SettlementRecord settlement = settlementRepository.findByProviderRefId(txn.getProviderRefId()).orElse(null);
+        if (settlement == null) {
             log.warn("Reconciliation mismatch detected. type={}, transactionId={}, providerRefId={}",
                     MismatchType.MISSING_PROVIDER_RECORD, txn.getId(), txn.getProviderRefId());
             return List.of(buildMismatch(txn, UNKNOWN_EXTERNAL_STATUS, MismatchType.MISSING_PROVIDER_RECORD));
         }
 
         List<ReconciliationMismatch> mismatches = new ArrayList<>();
-        String providerStatus = providerStatus(details);
 
-        // Cross-check: compare internal orchestration state against the provider state.
-        if (!txn.getStatus().name().equals(providerStatus)) {
+        if (!txn.getStatus().name().equals(settlement.getExternalStatus())) {
             log.warn(
                     "Reconciliation mismatch detected. type={}, transactionId={}, internalStatus={}, providerStatus={}",
-                    MismatchType.STATUS_MISMATCH, txn.getId(), txn.getStatus().name(), providerStatus);
-            mismatches.add(buildMismatch(txn, providerStatus, MismatchType.STATUS_MISMATCH));
+                    MismatchType.STATUS_MISMATCH, txn.getId(), txn.getStatus().name(), settlement.getExternalStatus());
+            mismatches.add(buildMismatch(txn, settlement.getExternalStatus(), MismatchType.STATUS_MISMATCH));
         }
 
-        if (amountsDiffer(txn.getAmount(), details.getAmount())) {
+        if (amountsDiffer(txn.getAmount(), settlement.getGrossAmount())) {
             log.warn(
                     "Reconciliation mismatch detected. type={}, transactionId={}, internalAmount={}, providerAmount={}",
-                    MismatchType.AMOUNT_MISMATCH, txn.getId(), txn.getAmount(), details.getAmount());
-            mismatches.add(buildMismatch(txn, providerStatus, MismatchType.AMOUNT_MISMATCH));
+                    MismatchType.AMOUNT_MISMATCH, txn.getId(), txn.getAmount(), settlement.getGrossAmount());
+            mismatches.add(buildMismatch(txn, settlement.getExternalStatus(), MismatchType.AMOUNT_MISMATCH));
         }
 
-        // If records are fully aligned, return null. Spring Batch filters out null
-        // entries from writing out.
+        BigDecimal expectedNet = settlement.getGrossAmount().subtract(settlement.getFeeAmount());
+        if (expectedNet.compareTo(settlement.getNetAmount()) != 0) {
+            log.warn(
+                    "Reconciliation mismatch detected. type={}, transactionId={}, expectedNet={}, recordedNet={}",
+                    MismatchType.FEE_CALCULATION_ERROR, txn.getId(), expectedNet, settlement.getNetAmount());
+            mismatches.add(buildMismatch(txn, settlement.getExternalStatus(), MismatchType.FEE_CALCULATION_ERROR));
+        }
+
         return mismatches.isEmpty() ? null : mismatches;
     }
 
@@ -83,13 +74,6 @@ public class TransactionItemProcessor implements ItemProcessor<Transaction, List
                 .resolutionStatus(PENDING_INVESTIGATION)
                 .createdAt(LocalDateTime.now())
                 .build();
-    }
-
-    private String providerStatus(ProviderTransactionDetails details) {
-        if (details.getStatus() != null) {
-            return details.getStatus().name();
-        }
-        return details.getExternalStatus();
     }
 
     private boolean amountsDiffer(BigDecimal internalAmount, BigDecimal providerAmount) {

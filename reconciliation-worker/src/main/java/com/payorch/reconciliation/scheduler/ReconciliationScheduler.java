@@ -1,6 +1,7 @@
 // File: reconciliation-worker/src/main/java/com/payorch/reconciliation/scheduler/ReconciliationScheduler.java
 package com.payorch.reconciliation.scheduler;
 
+import com.payorch.reconciliation.service.StripeSettlementPoller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -20,21 +21,25 @@ public class ReconciliationScheduler {
 
     private final JobLauncher jobLauncher;
     private final Job nightlyReconciliationJob;
+    private final StripeSettlementPoller stripeSettlementPoller;
 
     /**
-     * Triggers every night at 1:00 AM. 
-     * Uses ShedLock to ensure absolute exclusivity across all deployed server instances.
+     * Triggers every night at 1:00 AM.
+     * Uses ShedLock to ensure absolute exclusivity across all deployed server
+     * instances.
      */
     @Scheduled(cron = "0 0 1 * * ?")
-    @SchedulerLock(
-        name = "ReconciliationScheduler_nightlyRun", 
-        lockAtLeastFor = "PT5M", // Keep the lock for at least 5 minutes even if the job finishes early
-        lockAtMostFor = "PT14M" // Force-release the lock if the node dies mid-execution
+    @SchedulerLock(name = "ReconciliationScheduler_nightlyRun", lockAtLeastFor = "PT5M", // Keep the lock for at least 5
+                                                                                         // minutes even if the job
+                                                                                         // finishes early
+            lockAtMostFor = "PT14M" // Force-release the lock if the node dies mid-execution
     )
     public void executeNightlyReconciliation() {
         log.info("Acquired distributed lock execution authorization token. Firing Reconciliation Batch Engine...");
 
         try {
+            stripeSettlementPoller.syncLatestWindow();
+
             JobParameters jobParameters = new JobParametersBuilder()
                     .addDate("runDate", new Date()) // Dynamic run parameter forces a new unique instance execution
                     .toJobParameters();

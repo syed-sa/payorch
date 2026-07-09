@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EntityScan(basePackages = {
         "com.payorch.model",
-        "com.payorch.reconciliation.domain"
+        "com.payorch.reconciliation.domain",
+        "com.payorch.shared.model"
 })
 @EnableJpaRepositories(basePackages = {
         "com.payorch.repository",

@@ -37,6 +37,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Stripe SDK -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+        </dependency>
+
         <!-- ShedLock -->
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
