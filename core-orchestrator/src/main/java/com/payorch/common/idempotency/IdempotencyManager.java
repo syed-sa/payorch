@@ -14,37 +14,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Enterprise Idempotency Manager: Write-through cache pattern.
- *
- * Architecture (L1/L2 cache):
- * ┌──────────────────────┐
- * │ Request arrives │
- * └──────────────────────┘
- * ↓
- * ┌──────────────────────────────┐
- * │ L1: Redis lookup (<1ms) │ ← Fast path for replays
- * │ Hit? Return cached response │
- * └──────────────────────────────┘
- * ↓ (miss)
- * ┌──────────────────────────────┐
- * │ L2: Database lookup (recovery)│ ← Resilience to service restart
- * │ Found? Warm Redis + return │
- * └──────────────────────────────┘
- * ↓ (miss)
- * ┌──────────────────────────────┐
- * │ Acquire distributed lock │ ← Prevent concurrent execution
- * │ Execute payment logic │
- * │ Write-through: DB + Redis │
- * └──────────────────────────────┘
- *
- * Guarantees:
- * - Exactly-once semantics: Distributed lock prevents concurrent execution
- * - Durability: PostgreSQL persistence for audit trail & recovery
- * - Performance: Redis caching minimizes DB hits
- * - Replay safety: Request hash validation prevents divergent replays
- * - Automatic cleanup: TTL-based expiry (24h default)
- */
 @Component
 @Slf4j
 @RequiredArgsConstructor

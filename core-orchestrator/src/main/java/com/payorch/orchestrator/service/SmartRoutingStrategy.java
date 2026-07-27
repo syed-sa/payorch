@@ -25,18 +25,7 @@ public class SmartRoutingStrategy {
     private static final double W_COST = 0.30;
     private static final double W_LATENCY = 0.10;
 
-    /**
-     * Iterates through all available Provider beans and selects the best one based
-     * on
-     * weighted health metrics from Redis/DB.
-     */
-    public PaymentProvider selectBestProvider() {
-        return providers.stream()
-                .filter(this::isProviderAvailable)
-                .max(Comparator.comparingDouble(this::calculateScore))
-                .orElseThrow(
-                        () -> new RuntimeException("CRITICAL: No healthy payment providers available in the circuit"));
-    }
+
 
     private boolean isProviderAvailable(PaymentProvider provider) {
         PSPHealth pspHealth = metricsService.getHealth(provider.getProviderId());

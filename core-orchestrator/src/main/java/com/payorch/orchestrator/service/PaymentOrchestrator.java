@@ -7,6 +7,9 @@ import com.payorch.shared.contract.PaymentProvider;
 import com.payorch.shared.dto.PaymentExecutionRequest;
 import com.payorch.shared.dto.ProviderResponse;
 import com.payorch.shared.dto.ProviderStatus;
+import com.payorch.shared.exception.BusinessException;
+import com.payorch.shared.exception.InfrastructureException;
+import com.payorch.shared.exception.RetryableException;
 import com.payorch.shared.model.Transaction;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -52,25 +55,50 @@ public class PaymentOrchestrator {
             // 4. Execute external payment with dynamic failover capabilities
             ProviderResponse response = executeWithFailover(transaction, paymentMethodToken, attemptedProviderIds);
 
-            // 5. Store Final Idempotency Payload on Success/Controlled failure
-            idempotencyManager.saveResponse(key, objectMapper.writeValueAsString(response));
+            if (response.isFinalResponse()) {
+                // 5. Cache only definite or in-flight provider outcomes
+                idempotencyManager.saveResponse(key, objectMapper.writeValueAsString(response));
+            } else if (response.isTransientFailure()) {
+                stateManager.handleTransientFailureState(transaction,
+                        "TRANSIENT_PAYMENT_FAILURE: " + response.getErrorMessage());
+            }
             return response;
 
-        } catch (Exception e) {
-            log.error("Fatal platform orchestration exception for txn: {}", transaction.getId(), e);
-            stateManager.handleLocalFailureState(transaction, "FATAL_ORCHESTRATION_ERROR: " + e.getMessage());
+        } catch (BusinessException e) {
+            log.error("Final business failure for txn: {}", transaction.getId(), e);
+            stateManager.handleLocalFailureState(transaction, "BUSINESS_FAILURE: " + e.getMessage());
 
             ProviderResponse failResponse = ProviderResponse.builder()
                     .status(ProviderStatus.FAILED)
                     .errorMessage(e.getMessage())
+                    .finalResponse(true)
                     .build();
 
             try {
                 idempotencyManager.saveResponse(key, objectMapper.writeValueAsString(failResponse));
             } catch (Exception ex) {
-                log.error("Failed to cache execution failure status", ex);
+                log.error("Failed to cache final business failure response for key: {}", key, ex);
             }
             return failResponse;
+
+        } catch (RetryableException | InfrastructureException e) {
+            log.warn("Transient payment failure for txn {}: {}", transaction.getId(), e.getMessage());
+            stateManager.handleTransientFailureState(transaction, "TRANSIENT_FAILURE: " + e.getMessage());
+
+            return ProviderResponse.builder()
+                    .status(ProviderStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .finalResponse(false)
+                    .build();
+        } catch (Exception e) {
+            log.error("Unexpected payment execution failure for txn {}", transaction.getId(), e);
+            stateManager.handleTransientFailureState(transaction, "UNEXPECTED_FAILURE: " + e.getMessage());
+
+            return ProviderResponse.builder()
+                    .status(ProviderStatus.FAILED)
+                    .errorMessage("UNEXPECTED_FAILURE: " + e.getMessage())
+                    .finalResponse(false)
+                    .build();
         } finally {
             idempotencyManager.releaseLock(key);
         }
@@ -106,21 +134,37 @@ public class PaymentOrchestrator {
             PaymentExecutionRequest request = new PaymentExecutionRequest(transaction, paymentMethodToken);
             ProviderResponse response = circuitBreaker.executeSupplier(() -> provider.process(request));
 
+            if (response.isTransientFailure()) {
+                throw new RetryableException("Transient provider failure for provider " + providerId + ": "
+                        + response.getErrorMessage());
+            }
+ 
             // Record successful/handled response to DB & Outbox
             stateManager.finalizePaymentState(transaction, response);
             return response;
 
-        } catch (Exception e) {
+        } catch (BusinessException e) {
+            log.warn("Provider {} reported a final business failure for txn {}: {}", providerId,
+                    transaction.getId(), e.getMessage());
+            ProviderResponse failureResponse = ProviderResponse.builder()
+                    .status(ProviderStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .finalResponse(true)
+                    .build();
+            stateManager.finalizePaymentState(transaction, failureResponse);
+            return failureResponse;
+
+        } catch (RetryableException | InfrastructureException e) {
             log.warn("Provider {} failed or circuit is open! Error: {}. Initiating cascading failover...", providerId,
                     e.getMessage());
 
-            // If we have exhausted all available payment providers, bubble up the failure
             if (routingStrategy.getAvailableProviderCount() <= attemptedProviderIds.size()) {
-                throw new RuntimeException("All downstream payment providers have been completely exhausted.", e);
+                throw new RetryableException("All downstream payment providers have been completely exhausted.", e);
             }
 
-            // RECURSIVE FAILOVER: Try the next best provider smoothly
             return executeWithFailover(transaction, paymentMethodToken, attemptedProviderIds);
+        } catch (Exception e) {
+            throw new InfrastructureException("Unexpected provider execution failure", e);
         }
     }
 

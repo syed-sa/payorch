@@ -60,8 +60,18 @@ public class PaymentStateManager {
         txn.setFailureReason(message);
         txn.setUpdatedAt(LocalDateTime.now());
         transactionRepository.save(txn);
-        
+
         createOutboxEvent("PAYMENT_FAILED", txn);
+    }
+
+    @Transactional
+    public void handleTransientFailureState(Transaction txn, String message) {
+        txn.setStatus(TransactionStatus.PENDING);
+        txn.setFailureReason(message);
+        txn.setUpdatedAt(LocalDateTime.now());
+        transactionRepository.save(txn);
+
+        createOutboxEvent("PAYMENT_PENDING", txn);
     }
 
     /**
@@ -90,7 +100,8 @@ public class PaymentStateManager {
         } else if ("FAILED".equalsIgnoreCase(targetStatus)) {
             txn.setStatus(TransactionStatus.FAILED);
             txn.setFailureReason(failureReason != null ? failureReason : "WEBHOOK_ASYNC_GATEWAY_FAILURE_REPORT");
-            log.warn("Transitioning transaction state to FAILED for system record tracking ID: {}. Reason: {}", txn.getId(), failureReason);
+            log.warn("Transitioning transaction state to FAILED for system record tracking ID: {}. Reason: {}",
+                    txn.getId(), failureReason);
         } else if ("PENDING".equalsIgnoreCase(targetStatus)) {
             txn.setStatus(TransactionStatus.PENDING);
             log.info("Transitioning transaction state to PENDING for system record tracking ID: {}", txn.getId());
@@ -98,7 +109,8 @@ public class PaymentStateManager {
             txn.setStatus(TransactionStatus.REFUNDED);
             log.info("Transitioning transaction state to REFUNDED for system record tracking ID: {}", txn.getId());
         } else {
-            log.info("Webhook event contains unsupported state tracking update ({}). No state transition needed for tracking ID: {}",
+            log.info(
+                    "Webhook event contains unsupported state tracking update ({}). No state transition needed for tracking ID: {}",
                     targetStatus, txn.getId());
             return;
         }
@@ -148,5 +160,5 @@ public class PaymentStateManager {
             case REFUNDED -> "PAYMENT_REFUNDED";
         };
     }
-    
+
 }

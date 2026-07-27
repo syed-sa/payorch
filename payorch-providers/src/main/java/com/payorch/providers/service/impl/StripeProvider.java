@@ -5,10 +5,16 @@ import com.payorch.shared.dto.PaymentExecutionRequest;
 import com.payorch.shared.dto.ProviderResponse;
 import com.payorch.shared.dto.ProviderStatus;
 import com.payorch.shared.dto.ProviderTransactionDetails;
+import com.payorch.shared.exception.BusinessException;
+import com.payorch.shared.exception.RetryableException;
 import com.payorch.shared.exception.ProviderStatusException;
 import com.payorch.shared.model.Transaction;
 import com.payorch.shared.util.TokenMaskingUtil;
 import com.stripe.Stripe;
+import com.stripe.exception.ApiConnectionException;
+import com.stripe.exception.ApiException;
+import com.stripe.exception.CardException;
+import com.stripe.exception.InvalidRequestException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.annotation.PostConstruct;
@@ -53,13 +59,36 @@ public class StripeProvider implements PaymentProvider {
                     .externalId(intent.getId())
                     .status(ProviderStatus.PENDING)
                     .rawResponse(intent.toJson())
+                    .finalResponse(true)
                     .build();
 
+        } catch (CardException e) {
+            log.error("Stripe card declined or invalid payment details for transaction {}", transaction.getId(), e);
+            return ProviderResponse.builder()
+                    .status(ProviderStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .finalResponse(true)
+                    .build();
+        } catch (InvalidRequestException | IllegalArgumentException e) {
+            log.error("Stripe invalid request or invalid token for transaction {}", transaction.getId(), e);
+            return ProviderResponse.builder()
+                    .status(ProviderStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .finalResponse(true)
+                    .build();
+        } catch (ApiConnectionException | ApiException e) {
+            log.warn("Stripe transient or provider-side failure for transaction {}", transaction.getId(), e);
+            return ProviderResponse.builder()
+                    .status(ProviderStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .finalResponse(false)
+                    .build();
         } catch (Exception e) {
             log.error("Stripe payment creation failed for transaction {}", transaction.getId(), e);
             return ProviderResponse.builder()
                     .status(ProviderStatus.FAILED)
                     .errorMessage(e.getMessage())
+                    .finalResponse(false)
                     .build();
         }
     }

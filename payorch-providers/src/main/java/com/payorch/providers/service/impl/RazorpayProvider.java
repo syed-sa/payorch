@@ -2,6 +2,7 @@ package com.payorch.providers.service.impl;
 
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -53,13 +54,29 @@ public class RazorpayProvider implements PaymentProvider {
                     .externalId(order.get("id"))
                     .status(ProviderStatus.PENDING)
                     .rawResponse(order.toString())
+                    .finalResponse(true)
                     .build();
 
+        } catch (IllegalArgumentException e) {
+            log.error("Razorpay invalid payment request for transaction {}", transaction.getId(), e);
+            return ProviderResponse.builder()
+                    .status(ProviderStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .finalResponse(true)
+                    .build();
+        } catch (RazorpayException e) {
+            log.warn("Razorpay transient provider failure for transaction {}", transaction.getId(), e);
+            return ProviderResponse.builder()
+                    .status(ProviderStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .finalResponse(false)
+                    .build();
         } catch (Exception e) {
             log.error("Razorpay payment creation failed for transaction {}", transaction.getId(), e);
             return ProviderResponse.builder()
                     .status(ProviderStatus.FAILED)
                     .errorMessage(e.getMessage())
+                    .finalResponse(false)
                     .build();
         }
     }
