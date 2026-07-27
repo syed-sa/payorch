@@ -1,7 +1,7 @@
 // File: reconciliation-worker/src/main/java/com/payorch/reconciliation/scheduler/ReconciliationScheduler.java
 package com.payorch.reconciliation.scheduler;
 
-import com.payorch.reconciliation.service.StripeSettlementPoller;
+import com.payorch.reconciliation.service.SettlementPoller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -21,7 +22,7 @@ public class ReconciliationScheduler {
 
     private final JobLauncher jobLauncher;
     private final Job nightlyReconciliationJob;
-    private final StripeSettlementPoller stripeSettlementPoller;
+    private final List<SettlementPoller> settlementPollers;
 
     /**
      * Triggers every night at 1:00 AM.
@@ -38,7 +39,10 @@ public class ReconciliationScheduler {
         log.info("Acquired distributed lock execution authorization token. Firing Reconciliation Batch Engine...");
 
         try {
-            stripeSettlementPoller.syncLatestWindow();
+            for (SettlementPoller poller : settlementPollers) {
+                log.info("Syncing latest settlement window for provider {}", poller.providerName());
+                poller.syncLatestWindow();
+            }
 
             JobParameters jobParameters = new JobParametersBuilder()
                     .addDate("runDate", new Date()) // Dynamic run parameter forces a new unique instance execution

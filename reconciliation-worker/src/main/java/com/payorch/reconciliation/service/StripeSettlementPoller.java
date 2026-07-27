@@ -18,7 +18,7 @@ import java.time.temporal.ChronoUnit;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class StripeSettlementPoller {
+public class StripeSettlementPoller implements SettlementPoller {
 
     private final SettlementRecordRepository settlementRecordRepository;
 
@@ -74,6 +74,12 @@ public class StripeSettlementPoller {
         }
     }
 
+    @Override
+    public String providerName() {
+        return "STRIPE";
+    }
+
+    @Override
     public void syncLatestWindow() {
         Instant end = Instant.now();
         Instant start = end.minus(24, ChronoUnit.HOURS);
