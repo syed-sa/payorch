@@ -25,3 +25,9 @@ spring:
       initialize-schema: always # Auto-generates Spring Batch metadata tables on initial launch
     job:
       enabled: false # Disables automatic job execution on launch; execution is driven purely by our scheduler
+
+payment:
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    settlement-lag-days: ${RAZORPAY_SETTLEMENT_LAG_DAYS:3}
